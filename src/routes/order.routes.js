@@ -80,6 +80,6 @@ router.get("/by-user/:userId", controller.getByUser);
  *       400:
  *         description: Invalid status
  */
-router.patch("/orders/:id/status", controller.UpdateStatus);
+router.patch("/:id/status", controller.UpdateStatus);
 
 module.exports = router;
