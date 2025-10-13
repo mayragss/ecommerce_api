@@ -20,6 +20,73 @@ app.use("/uploads", express.static(path.join(__dirname, "src", "uploads")));
 const { sequelize } = require("./src/models");
 const { checkAndFixForeignKeys } = require("./src/utils/migration");
 
+async function fixDuplicateConstraints() {
+  try {
+    console.log("🔧 Fixing duplicate foreign key constraints...");
+    
+    // Get all foreign key constraints
+    const [constraints] = await sequelize.query(`
+      SELECT 
+        CONSTRAINT_NAME,
+        TABLE_NAME,
+        COLUMN_NAME,
+        REFERENCED_TABLE_NAME,
+        REFERENCED_COLUMN_NAME
+      FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+      WHERE REFERENCED_TABLE_NAME IS NOT NULL 
+      AND TABLE_SCHEMA = DATABASE()
+      ORDER BY TABLE_NAME, CONSTRAINT_NAME
+    `);
+    
+    // Group by constraint name to find duplicates
+    const constraintGroups = {};
+    constraints.forEach(constraint => {
+      if (!constraintGroups[constraint.CONSTRAINT_NAME]) {
+        constraintGroups[constraint.CONSTRAINT_NAME] = [];
+      }
+      constraintGroups[constraint.CONSTRAINT_NAME].push(constraint);
+    });
+    
+    // Find and fix duplicates
+    for (const [constraintName, constraintList] of Object.entries(constraintGroups)) {
+      if (constraintList.length > 1) {
+        console.log(`🔧 Found duplicate constraint: ${constraintName}`);
+        
+        // Keep the first one, drop the rest
+        for (let i = 1; i < constraintList.length; i++) {
+          const constraint = constraintList[i];
+          const newName = `${constraintName}_${i}`;
+          
+          try {
+            // Drop the duplicate constraint
+            await sequelize.query(`
+              ALTER TABLE \`${constraint.TABLE_NAME}\` 
+              DROP FOREIGN KEY \`${constraintName}\`
+            `);
+            
+            // Recreate with new name
+            await sequelize.query(`
+              ALTER TABLE \`${constraint.TABLE_NAME}\` 
+              ADD CONSTRAINT \`${newName}\` 
+              FOREIGN KEY (\`${constraint.COLUMN_NAME}\`) 
+              REFERENCES \`${constraint.REFERENCED_TABLE_NAME}\`(\`${constraint.REFERENCED_COLUMN_NAME}\`)
+              ON DELETE SET NULL ON UPDATE CASCADE
+            `);
+            
+            console.log(`✅ Renamed constraint ${constraintName} to ${newName} in table ${constraint.TABLE_NAME}`);
+          } catch (error) {
+            console.log(`⚠️  Could not fix constraint ${constraintName}: ${error.message}`);
+          }
+        }
+      }
+    }
+    
+    console.log("✅ Duplicate constraints fixed");
+  } catch (error) {
+    console.error("❌ Error fixing duplicate constraints:", error);
+  }
+}
+
 // Middleware for JWT auth
 const authenticate = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
@@ -114,7 +181,18 @@ async function start() {
     const needsSync = await checkSchemaChanges();
     if (needsSync) {
       console.log("📋 Creating/updating tables...");
-      await sequelize.sync({ force: false });
+      try {
+        await sequelize.sync({ force: false });
+      } catch (error) {
+        if (error.message.includes('Duplicate foreign key constraint name')) {
+          console.log("⚠️  Duplicate constraint detected, trying to fix...");
+          await fixDuplicateConstraints();
+          // Try sync again after fixing constraints
+          await sequelize.sync({ force: false });
+        } else {
+          throw error;
+        }
+      }
     }
     
     // Check for foreign key issues in production
