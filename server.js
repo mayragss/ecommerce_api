@@ -13,7 +13,21 @@ const mysql = require("mysql2/promise");
 const app = express();
 require("./src/swagger")(app);
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: '*', // Aceita qualquer origem
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: false // Não permite credenciais para origem wildcard
+}));
+
+// Handle preflight requests
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.sendStatus(200);
+});
+
 app.use(morgan("dev"));
 app.use("/uploads", express.static(path.join(__dirname, "src", "uploads")));
 
