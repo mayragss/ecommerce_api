@@ -18,6 +18,7 @@ app.use(morgan("dev"));
 app.use("/uploads", express.static(path.join(__dirname, "src", "uploads")));
 
 const { sequelize } = require("./src/models");
+const { checkAndFixForeignKeys } = require("./src/utils/migration");
 
 // Middleware for JWT auth
 const authenticate = (req, res, next) => {
@@ -66,13 +67,61 @@ async function ensureDatabaseExists() {
   await connection.end();
 }
 
+async function checkSchemaChanges() {
+  try {
+    // Get current database schema
+    const [tables] = await sequelize.query("SHOW TABLES");
+    if (tables.length === 0) return true; // No tables, need to create
+    
+    // Check if all expected tables exist
+    const expectedTables = ['Users', 'Products', 'Orders', 'OrderItems', 'Carts', 'CartItems', 'Addresses', 'Favorites', 'Coupons'];
+    const existingTables = tables.map(table => Object.values(table)[0]);
+    const missingTables = expectedTables.filter(table => !existingTables.includes(table));
+    
+    if (missingTables.length > 0) {
+      console.log(`📋 Missing tables: ${missingTables.join(', ')}`);
+      return true;
+    }
+    
+    // Check for schema changes by comparing with model definitions
+    // This is a simplified check - in production you might want more sophisticated migration handling
+    console.log("📋 All tables exist, checking for schema changes...");
+    
+    // For now, we'll use alter: true but with error handling
+    try {
+      await sequelize.sync({ alter: true });
+      console.log("✅ Schema synchronized successfully");
+      return false;
+    } catch (error) {
+      if (error.message.includes('Duplicate foreign key constraint name')) {
+        console.log("⚠️  Schema has conflicts, but tables exist. Continuing with existing schema...");
+        return false;
+      }
+      throw error;
+    }
+  } catch (error) {
+    console.error("❌ Error checking schema:", error);
+    return true; // If we can't check, assume we need to create
+  }
+}
+
 async function start() {
   try {
     await ensureDatabaseExists(); // ✅ Cria o banco, se não existir
     await sequelize.authenticate();
     console.log("✅ Connected to MySQL");
 
-    await sequelize.sync({ alter: true }); // ou { force: true } se preferir limpar
+    const needsSync = await checkSchemaChanges();
+    if (needsSync) {
+      console.log("📋 Creating/updating tables...");
+      await sequelize.sync({ force: false });
+    }
+    
+    // Check for foreign key issues in production
+    if (process.env.NODE_ENV === 'production') {
+      await checkAndFixForeignKeys();
+    }
+    
     app.listen(process.env.PORT || 3000, () => {
       console.log("🚀 Server running on port " + (process.env.PORT || 3000));
     });
