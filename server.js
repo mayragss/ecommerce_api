@@ -68,7 +68,7 @@ app.use("/auth", authRoutes);
 app.get("/health", (req, res) => res.json({ status: "API online" }));
 
 // Load Swagger AFTER all routes are defined
-require("./src/swagger")(app);
+//require("./src/swagger")(app);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
