@@ -1,0 +1,33 @@
+{
+  "name": "ecommerce-api",
+  "version": "1.0.0",
+  "description": "An ecommerce api for multiple stores",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "author": "MayG",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "fs": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.0",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "mysql2": "^3.9.1",
+    "nodemailer": "^6.9.8",
+    "path": "^0.12.7",
+    "pdfkit": "^0.13.0",
+    "sequelize": "^6.35.1",
+    "stripe": "^14.17.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
