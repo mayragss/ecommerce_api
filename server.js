@@ -12,20 +12,26 @@ const mysql = require("mysql2/promise");
 
 const app = express();
 app.use(express.json());
+
+const allowedOrigins = [
+  'http://localhost:4200',         // ambiente local
+  'https://gaithgio.com/' ,    // produção
+  'https://www.gaithgio.com/' ,    // produção
+];
+
 app.use(cors({
-  origin: '*', // Aceita qualquer origem
+  origin: function (origin, callback) {
+    // Permite requisições sem origin (como Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: false // Não permite credenciais para origem wildcard
+  credentials: true, // permite tokens e cookies se necessários
 }));
 
-// Handle preflight requests
-app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.sendStatus(200);
-});
+app.options('*', cors());
 
 app.use(morgan("dev"));
 app.use("/uploads", express.static(path.join(__dirname, "src", "uploads")));
@@ -68,7 +74,7 @@ app.use("/auth", authRoutes);
 app.get("/health", (req, res) => res.json({ status: "API online" }));
 
 // Load Swagger AFTER all routes are defined
-//require("./src/swagger")(app);
+require("./src/swagger")(app);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
