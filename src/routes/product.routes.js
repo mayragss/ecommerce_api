@@ -122,7 +122,7 @@ router.get("/:id", controller.getById);
  *       401:
  *         description: Não autorizado
  */
-router.post("/", authenticate, authorizeAdmin, upload.array("images", 5), controller.create);
+router.post("/", authenticate, authorizeAdmin,  upload.array("images", 5), controller.create);
 
 /**
  * @swagger

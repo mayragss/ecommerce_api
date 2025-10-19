@@ -1,0 +1,69 @@
+<div class="container-fluid vh-100 d-flex align-items-center justify-content-center">
+  <div class="row w-100">
+    <div class="col-md-6 col-lg-4 mx-auto">
+      <div class="card shadow-lg border-0">
+        <div class="card-body p-5">
+          <div class="text-center mb-4">
+            <i class="fas fa-shopping-cart fa-3x text-primary mb-3"></i>
+            <h3 class="fw-bold">Admin Panel</h3>
+            <p class="text-muted">Faça login para acessar o painel administrativo</p>
+          </div>
+          
+          <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input 
+                type="email" 
+                class="form-control" 
+                id="email" 
+                name="email"
+                [(ngModel)]="credentials.email"
+                required
+                email
+                #email="ngModel"
+                [class.is-invalid]="email.invalid && email.touched"
+              >
+              <div class="invalid-feedback" *ngIf="email.invalid && email.touched">
+                Por favor, insira um email válido.
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="password" class="form-label">Senha</label>
+              <input 
+                type="password" 
+                class="form-control" 
+                id="password" 
+                name="password"
+                [(ngModel)]="credentials.password"
+                required
+                minlength="6"
+                #password="ngModel"
+                [class.is-invalid]="password.invalid && password.touched"
+              >
+              <div class="invalid-feedback" *ngIf="password.invalid && password.touched">
+                A senha deve ter pelo menos 6 caracteres.
+              </div>
+            </div>
+            
+            <div class="d-grid">
+              <button 
+                type="submit" 
+                class="btn btn-primary btn-lg"
+                [disabled]="loginForm.invalid || loading"
+              >
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ loading ? 'Entrando...' : 'Entrar' }}
+              </button>
+            </div>
+            
+            <div class="alert alert-danger mt-3" *ngIf="errorMessage">
+              {{ errorMessage }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

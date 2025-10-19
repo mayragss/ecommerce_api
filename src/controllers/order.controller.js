@@ -1,6 +1,52 @@
 const { Order, OrderItem, Product, User } = require("../models");
 
 module.exports = {
+    async getAll(req, res) {
+        try {
+            const orders = await Order.findAll({
+                include: [
+                    {
+                        model: User,
+                        attributes: ['id', 'name', 'email']
+                    },
+                    {
+                        model: Product,
+                        through: { attributes: ['quantity', 'price'] }
+                    }
+                ],
+                order: [['createdAt', 'DESC']]
+            });
+            res.json(orders);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
+
+    async getById(req, res) {
+        try {
+            const order = await Order.findByPk(req.params.id, {
+                include: [
+                    {
+                        model: User,
+                        attributes: ['id', 'name', 'email', 'phone']
+                    },
+                    {
+                        model: Product,
+                        through: { attributes: ['quantity', 'price'] }
+                    }
+                ]
+            });
+            
+            if (!order) {
+                return res.status(404).json({ error: "Pedido não encontrado" });
+            }
+            
+            res.json(order);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
+
     async create(req, res) {
         const { userId, items } = req.body;
         const user = await User.findByPk(userId);

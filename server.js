@@ -31,7 +31,7 @@ app.use(cors({
   credentials: true, // permite tokens e cookies se necessários
 }));
 
-app.options('*', cors());
+// app.options('*', cors()); // Removido - causava erro no path-to-regexp
 
 app.use(morgan("dev"));
 app.use("/uploads", express.static(path.join(__dirname, "src", "uploads")));
@@ -60,6 +60,7 @@ const favoriteRoutes = require("./src/routes/favorite.routes");
 const paymentRoutes = require("./src/routes/payment.routes");
 const invoiceRoutes = require("./src/routes/invoice.routes");
 const adminRoutes = require("./src/routes/admin.routes");
+const couponRoutes = require("./src/routes/coupon.routes");
 
 app.use("/users", userRoutes);
 app.use("/products", productRoutes);
@@ -68,6 +69,7 @@ app.use("/cart", cartRoutes);
 app.use("/favorites", favoriteRoutes);
 app.use("/payments", paymentRoutes);
 app.use("/invoices", invoiceRoutes);
+app.use("/coupons", couponRoutes);
 app.use("/admin", authenticate, adminRoutes);
 app.use("/auth", authRoutes);
 

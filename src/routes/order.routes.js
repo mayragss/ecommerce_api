@@ -1,12 +1,35 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/order.controller");
+const { authenticate, authorizeAdmin } = require("../middleware/auth");
 /**
  * @swagger
  * tags:
  *   name: Orders
  *   description: Order management
  */
+
+/**
+ * @swagger
+ * /orders:
+ *   get:
+ *     summary: List all orders (admin only)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of orders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/", authenticate, authorizeAdmin, controller.getAll);
 
 /**
  * @swagger
@@ -31,6 +54,35 @@ router.post("/", controller.create);
 
 /**
  * @swagger
+ * /orders/{id}:
+ *   get:
+ *     summary: Get order by ID (admin only)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Order ID
+ *     responses:
+ *       200:
+ *         description: Order found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       404:
+ *         description: Order not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/:id", authenticate, authorizeAdmin, controller.getById);
+
+/**
+ * @swagger
  * /orders/by-user/{userId}:
  *   get:
  *     summary: Get all orders for a user
@@ -52,10 +104,12 @@ router.get("/by-user/:userId", controller.getByUser);
 
 /**
  * @swagger
- * /orders/orders/{id}/status:
- *   patch:
- *     summary: Update order status
+ * /orders/{id}/status:
+ *   put:
+ *     summary: Update order status (admin only)
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -79,7 +133,9 @@ router.get("/by-user/:userId", controller.getByUser);
  *         description: Status updated
  *       400:
  *         description: Invalid status
+ *       401:
+ *         description: Unauthorized
  */
-router.patch("/:id/status", controller.UpdateStatus);
+router.put("/:id/status", authenticate, authorizeAdmin, controller.UpdateStatus);
 
 module.exports = router;

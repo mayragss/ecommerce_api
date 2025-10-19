@@ -1,0 +1,330 @@
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0 text-gray-800">
+          <i class="fas fa-ticket-alt me-2"></i>
+          Gestão de Cupons
+        </h1>
+        <button class="btn btn-primary" (click)="openCouponModal()">
+          <i class="fas fa-plus me-2"></i>
+          Novo Cupom
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="searchInput" class="form-label">Buscar</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          id="searchInput"
+          placeholder="Código do cupom..."
+          [(ngModel)]="searchTerm"
+          (input)="filterCoupons()"
+        >
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="form-group">
+        <label for="typeFilter" class="form-label">Tipo</label>
+        <select class="form-control" id="typeFilter" [(ngModel)]="selectedType" (change)="filterCoupons()">
+          <option value="">Todos os tipos</option>
+          <option value="fixed">Valor fixo</option>
+          <option value="percentage">Porcentagem</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="form-group">
+        <label for="statusFilter" class="form-label">Status</label>
+        <select class="form-control" id="statusFilter" [(ngModel)]="selectedStatus" (change)="filterCoupons()">
+          <option value="">Todos</option>
+          <option value="active">Ativo</option>
+          <option value="expired">Expirado</option>
+          <option value="exhausted">Esgotado</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="form-group">
+        <label class="form-label">&nbsp;</label>
+        <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+          <i class="fas fa-times me-1"></i>
+          Limpar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coupons Table -->
+  <div class="card shadow">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Tipo</th>
+              <th>Valor</th>
+              <th>Uso</th>
+              <th>Expiração</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let coupon of filteredCoupons">
+              <td>
+                <div class="coupon-code">
+                  <strong>{{ coupon.code }}</strong>
+                </div>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getTypeClass(coupon.discountType)">
+                  {{ getTypeText(coupon.discountType) }}
+                </span>
+              </td>
+              <td>
+                <div class="coupon-value">
+                  {{ formatValue(coupon) }}
+                </div>
+              </td>
+              <td>
+                <div class="usage-info">
+                  <div class="usage-text">
+                    {{ coupon.usedCount || 0 }} / {{ coupon.usageLimit || '∞' }}
+                  </div>
+                  <div class="progress mt-1" style="height: 4px;">
+                    <div class="progress-bar" 
+                         [style.width.%]="getUsagePercentage(coupon)"
+                         [ngClass]="getUsageClass(coupon)">
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="expiration-date">
+                  {{ formatDate(coupon.validUntil) }}
+                </div>
+                <small class="text-muted" [ngClass]="getExpirationClass(coupon)">
+                  {{ getExpirationText(coupon) }}
+                </small>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(coupon)">
+                  {{ getStatusText(coupon) }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group" role="group">
+                  <button class="btn btn-sm btn-outline-primary" (click)="editCoupon(coupon)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-info" (click)="viewCoupon(coupon)">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteCoupon(coupon)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredCoupons.length === 0">
+              <td colspan="7" class="text-center text-muted py-4">
+                <i class="fas fa-ticket-alt fa-3x mb-3"></i>
+                <p>Nenhum cupom encontrado</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="row mt-4" *ngIf="totalPages > 1">
+    <div class="col-12">
+      <nav>
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" (click)="goToPage(currentPage - 1)">Anterior</button>
+          </li>
+          <li class="page-item" *ngFor="let page of getPageNumbers()" [class.active]="page === currentPage">
+            <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <button class="page-link" (click)="goToPage(currentPage + 1)">Próximo</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Coupon Modal -->
+<div class="modal fade" id="couponModal" tabindex="-1" aria-labelledby="couponModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="couponModalLabel">
+          {{ editingCoupon ? 'Editar Cupom' : 'Novo Cupom' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form (ngSubmit)="saveCoupon()" #couponForm="ngForm">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="couponCode" class="form-label">Código *</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="couponCode"
+                  [(ngModel)]="couponFormData.code"
+                  name="code"
+                  required
+                  [disabled]="!!editingCoupon"
+                >
+                <div class="form-text" *ngIf="!editingCoupon">O código não pode ser alterado após a criação.</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="couponType" class="form-label">Tipo *</label>
+                <select class="form-control" id="couponType" [(ngModel)]="couponFormData.discountType" name="discountType" required>
+                  <option value="fixed">Valor Fixo</option>
+                  <option value="percentage">Porcentagem</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="couponValue" class="form-label">Valor *</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  id="couponValue"
+                  [(ngModel)]="couponFormData.discountValue"
+                  name="discountValue"
+                  step="0.01"
+                  min="0"
+                  required
+                >
+                <div class="form-text">
+                  {{ couponFormData.discountType === 'percentage' ? 'Valor em % (ex: 10 para 10%)' : 'Valor em reais (ex: 15.50)' }}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="couponUsageLimit" class="form-label">Limite de Uso</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  id="couponUsageLimit"
+                  [(ngModel)]="couponFormData.usageLimit"
+                  name="usageLimit"
+                  min="1"
+                >
+                <div class="form-text">Deixe vazio para uso ilimitado.</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="couponExpiresAt" class="form-label">Data de Expiração *</label>
+                <input 
+                  type="datetime-local" 
+                  class="form-control" 
+                  id="couponExpiresAt"
+                  [(ngModel)]="couponFormData.validUntil"
+                  name="validUntil"
+                  required
+                >
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="couponIsActive" class="form-label">Status</label>
+                <select class="form-control" id="couponIsActive" [(ngModel)]="couponFormData.isActive" name="isActive">
+                  <option [value]="true">Ativo</option>
+                  <option [value]="false">Inativo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="couponForm.invalid || saving">
+            <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+            {{ saving ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Coupon Details Modal -->
+<div class="modal fade" id="couponDetailsModal" tabindex="-1" aria-labelledby="couponDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="couponDetailsModalLabel">Detalhes do Cupom</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedCoupon">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Código</h6>
+            <p class="coupon-code-display">{{ selectedCoupon.code }}</p>
+            
+            <h6>Tipo</h6>
+            <p>
+              <span class="badge" [ngClass]="getTypeClass(selectedCoupon.discountType)">
+                {{ getTypeText(selectedCoupon.discountType) }}
+              </span>
+            </p>
+            
+            <h6>Valor</h6>
+            <p class="coupon-value-display">{{ formatValue(selectedCoupon) }}</p>
+          </div>
+          <div class="col-md-6">
+            <h6>Uso</h6>
+            <p>{{ selectedCoupon.usedCount || 0 }} / {{ selectedCoupon.usageLimit || '∞' }}</p>
+            <div class="progress mb-3">
+              <div class="progress-bar" 
+                   [style.width.%]="getUsagePercentage(selectedCoupon)"
+                   [ngClass]="getUsageClass(selectedCoupon)">
+              </div>
+            </div>
+            
+            <h6>Expiração</h6>
+            <p>{{ formatDate(selectedCoupon.validUntil) }}</p>
+            
+            <h6>Status</h6>
+            <p>
+              <span class="badge" [ngClass]="getStatusClass(selectedCoupon)">
+                {{ getStatusText(selectedCoupon) }}
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

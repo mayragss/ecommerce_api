@@ -1,6 +1,29 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/user.controller");
+const { authenticate, authorizeAdmin } = require("../middleware/auth");
+
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: List all users (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/", authenticate, authorizeAdmin, controller.getAll);
 
 /**
  * @swagger
@@ -47,6 +70,63 @@ router.post("/", controller.create);
  *         description: User not found
  */
 router.get("/:id", controller.getById);
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Update user by ID (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: User ID
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       description: User data to update
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *       404:
+ *         description: User not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.put("/:id", authenticate, authorizeAdmin, controller.update);
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   delete:
+ *     summary: Delete user by ID (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: User ID
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: User deleted successfully
+ *       404:
+ *         description: User not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete("/:id", authenticate, authorizeAdmin, controller.delete);
 
 
 /**

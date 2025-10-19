@@ -1,0 +1,279 @@
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0 text-gray-800">
+          <i class="fas fa-box me-2"></i>
+          Gestão de Produtos
+        </h1>
+        <button class="btn btn-primary" (click)="openProductModal()">
+          <i class="fas fa-plus me-2"></i>
+          Novo Produto
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="searchInput" class="form-label">Buscar</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          id="searchInput"
+          placeholder="Nome do produto..."
+          [(ngModel)]="searchTerm"
+          (input)="filterProducts()"
+        >
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="form-group">
+        <label for="categoryFilter" class="form-label">Categoria</label>
+        <select class="form-control" id="categoryFilter" [(ngModel)]="selectedCategory" (change)="filterProducts()">
+          <option value="">Todas as categorias</option>
+          <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="form-group">
+        <label for="statusFilter" class="form-label">Status</label>
+        <select class="form-control" id="statusFilter" [(ngModel)]="selectedStatus" (change)="filterProducts()">
+          <option value="">Todos</option>
+          <option value="in_stock">Em estoque</option>
+          <option value="low_stock">Estoque baixo</option>
+          <option value="out_of_stock">Sem estoque</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="form-group">
+        <label class="form-label">&nbsp;</label>
+        <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+          <i class="fas fa-times me-1"></i>
+          Limpar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Table -->
+  <div class="card shadow">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Imagem</th>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Preço</th>
+              <th>Estoque</th>
+              <th>Vendidos</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of filteredProducts; trackBy: trackByProductId">
+              <td>
+                <img 
+                  [src]="getProductImage(product)" 
+                  [alt]="product.name"
+                  class="product-image"
+                  (error)="onImageError($event)"
+                >
+              </td>
+              <td>
+                <div class="product-name">{{ product.name }}</div>
+                <small class="text-muted">{{ product.description | slice:0:50 }}...</small>
+              </td>
+              <td>
+                <span class="badge bg-secondary">{{ product.category }}</span>
+              </td>
+              <td>
+                <strong>{{ product.price | currency:'BRL' }}</strong>
+              </td>
+              <td>
+                <span [ngClass]="getStockClass(product.stock)">
+                  {{ product.stock }}
+                </span>
+              </td>
+              <td>{{ product.sold || 0 }}</td>
+              <td>
+                <span class="badge" [ngClass]="getProductStatusClass(product)">
+                  {{ getProductStatus(product) }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group" role="group">
+                  <button class="btn btn-sm btn-outline-primary" (click)="editProduct(product)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteProduct(product)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredProducts.length === 0">
+              <td colspan="8" class="text-center text-muted py-4">
+                <i class="fas fa-box fa-3x mb-3"></i>
+                <p>Nenhum produto encontrado</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="row mt-4" *ngIf="totalPages > 1">
+    <div class="col-12">
+      <nav>
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" (click)="goToPage(currentPage - 1)">Anterior</button>
+          </li>
+          <li class="page-item" *ngFor="let page of getPageNumbers()" [class.active]="page === currentPage">
+            <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <button class="page-link" (click)="goToPage(currentPage + 1)">Próximo</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productModalLabel">
+          {{ editingProduct ? 'Editar Produto' : 'Novo Produto' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form (ngSubmit)="saveProduct()" #productForm="ngForm">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="productName" class="form-label">Nome *</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="productName"
+                  [(ngModel)]="productFormData.name"
+                  name="name"
+                  required
+                >
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="productPrice" class="form-label">Preço *</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  id="productPrice"
+                  [(ngModel)]="productFormData.price"
+                  name="price"
+                  step="0.01"
+                  min="0"
+                  required
+                >
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="productCategory" class="form-label">Categoria *</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="productCategory"
+                  [(ngModel)]="productFormData.category"
+                  name="category"
+                  required
+                >
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="productStock" class="form-label">Estoque *</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  id="productStock"
+                  [(ngModel)]="productFormData.stock"
+                  name="stock"
+                  min="0"
+                  required
+                >
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="productDescription" class="form-label">Descrição</label>
+            <textarea 
+              class="form-control" 
+              id="productDescription"
+              rows="3"
+              [(ngModel)]="productFormData.description"
+              name="description"
+            ></textarea>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="productCollection" class="form-label">Coleção</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="productCollection"
+                  [(ngModel)]="productFormData.collection"
+                  name="collection"
+                >
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="productPriority" class="form-label">Prioridade</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  id="productPriority"
+                  [(ngModel)]="productFormData.priority"
+                  name="priority"
+                  min="1"
+                  max="10"
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid || saving">
+            <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+            {{ saving ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
