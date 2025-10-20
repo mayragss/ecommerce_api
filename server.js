@@ -17,6 +17,8 @@ const allowedOrigins = [
   'http://localhost:4200',         // ambiente local
   'https://gaithgio.com' ,    // produção
   'https://www.gaithgio.com' ,    // produção
+  'https://www.admin.gaithgio.com' ,    // produção
+  'https://admin.gaithgio.com' ,    // produção
 ];
 
 app.use(cors({
