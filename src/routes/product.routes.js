@@ -154,7 +154,7 @@ router.post("/", authenticate, authorizeAdmin,  upload.array("images", 5), contr
  *       404:
  *         description: Produto não encontrado
  */
-router.put("/:id", authenticate, authorizeAdmin, controller.update);
+router.put("/:id", authenticate, authorizeAdmin, upload.array("images", 5), controller.update);
 
 /**
  * @swagger

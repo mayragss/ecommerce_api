@@ -110,3 +110,5 @@ SELECT 'Favoritos', COUNT(*) FROM Favorites;
 -- Admin: admin@ecommerce.com / admin123
 -- Usuários: joao@email.com, maria@email.com, pedro@email.com / 123456
 -- =====================================================
+
+

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Product, ProductFormData } from '../../models/product.model';
+import { ImageUploadComponent } from '../image-upload/image-upload.component';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ImageUploadComponent],
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -145,8 +146,36 @@ export class ProductsComponent implements OnInit {
   }
 
   getProductImage(product: Product): string {
-    if (product.images && product.images.length > 0) {
-      return product.images[0];
+    if (product.images) {
+      let imagesArray: string[] = [];
+      
+      // Se images é uma string, converter para array
+      if (Array.isArray(product.images)) {
+        imagesArray = product.images;
+      } else if (typeof product.images === 'string') {
+        // Limpar aspas e colchetes se existirem
+        let cleanImage = String(product.images).trim();
+        if (cleanImage.startsWith('[') && cleanImage.endsWith(']')) {
+          cleanImage = cleanImage.slice(1, -1);
+        }
+        if (cleanImage.startsWith('"') && cleanImage.endsWith('"')) {
+          cleanImage = cleanImage.slice(1, -1);
+        }
+        imagesArray = [cleanImage];
+      }
+      
+      if (imagesArray.length > 0 && imagesArray[0]) {
+        // Garantir que a URL seja absoluta se necessário
+        let imageUrl = imagesArray[0];
+        if (imageUrl.startsWith('/uploads/') || imageUrl.startsWith('uploads/')) {
+          // Se é uma URL relativa, adicionar o baseUrl do backend
+          imageUrl = `http://localhost:3000${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+        } else if (imageUrl.startsWith('images/')) {
+          // Se começa com images/, converter para uploads
+          imageUrl = `http://localhost:3000/uploads/${imageUrl}`;
+        }
+        return imageUrl;
+      }
     }
     return this.getPlaceholderImage();
   }
@@ -194,7 +223,7 @@ export class ProductsComponent implements OnInit {
         category: product.category || '',
         collection: product.collection || '',
         attributes: product.attributes || {},
-        images: product.images || [],
+        images: this.normalizeImages(product.images),
         isActive: product.isActive ?? true,
         priority: product.priority || 1
       };
@@ -294,5 +323,58 @@ export class ProductsComponent implements OnInit {
     if (modal) {
       (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
     }
+  }
+
+  onImagesChange(images: (string | File)[]) {
+    this.productFormData.images = images;
+  }
+
+  private normalizeImages(images: any): (string | File)[] {
+    if (!images) return [];
+    
+    // Se já é um array, limpar e retornar
+    if (Array.isArray(images)) {
+      return images.map(img => this.cleanImageString(img));
+    }
+    
+    // Se é uma string, limpar e converter para array
+    if (typeof images === 'string') {
+      const cleaned = this.cleanImageString(images);
+      return cleaned ? [cleaned] : [];
+    }
+    
+    // Se é um objeto com propriedades de array, tentar extrair
+    if (typeof images === 'object' && images !== null) {
+      // Tentar diferentes propriedades comuns
+      const possibleArrays = images.images || images.files || images.urls || [];
+      if (Array.isArray(possibleArrays)) {
+        return possibleArrays.map(img => this.cleanImageString(img));
+      }
+    }
+    
+    return [];
+  }
+
+  private cleanImageString(image: any): string {
+    if (typeof image !== 'string') return '';
+    
+    let cleaned = image.trim();
+    
+    // Remover colchetes se existirem
+    if (cleaned.startsWith('[') && cleaned.endsWith(']')) {
+      cleaned = cleaned.slice(1, -1);
+    }
+    
+    // Remover aspas duplas se existirem
+    if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+      cleaned = cleaned.slice(1, -1);
+    }
+    
+    // Remover aspas simples se existirem
+    if (cleaned.startsWith("'") && cleaned.endsWith("'")) {
+      cleaned = cleaned.slice(1, -1);
+    }
+    
+    return cleaned.trim();
   }
 }

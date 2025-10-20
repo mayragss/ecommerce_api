@@ -10,15 +10,19 @@ import { Coupon, CouponFormData } from '../models/coupon.model';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'https://api-ecommerce.maygomes.com'; // URL da sua API
-  private token = localStorage.getItem('admin_token');
+  private baseUrl = 'http://localhost:3000'; // URL da sua API
 
   constructor(private http: HttpClient) {}
 
+  private getToken(): string | null {
+    return localStorage.getItem('admin_token');
+  }
+
   private getHeaders(): HttpHeaders {
+    const token = this.getToken();
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.token}`
+      'Authorization': `Bearer ${token}`
     });
   }
 
@@ -75,14 +79,68 @@ export class ApiService {
   }
 
   createProduct(product: ProductFormData): Observable<Product> {
-    return this.http.post<Product>(`${this.baseUrl}/products`, product, {
-      headers: this.getHeaders()
+    const formData = this.createProductFormData(product);
+    return this.http.post<Product>(`${this.baseUrl}/products`, formData, {
+      headers: this.getHeadersForFormData()
     });
   }
 
   updateProduct(id: number, product: ProductFormData): Observable<Product> {
-    return this.http.put<Product>(`${this.baseUrl}/products/${id}`, product, {
-      headers: this.getHeaders()
+    const formData = this.createProductFormData(product);
+    return this.http.put<Product>(`${this.baseUrl}/products/${id}`, formData, {
+      headers: this.getHeadersForFormData()
+    });
+  }
+
+  private createProductFormData(product: ProductFormData): FormData {
+    const formData = new FormData();
+    
+    // Adicionar campos básicos
+    formData.append('name', product.name);
+    formData.append('description', product.description || '');
+    formData.append('price', product.price.toString());
+    formData.append('stock', product.stock.toString());
+    formData.append('category', product.category);
+    formData.append('collection', product.collection || '');
+    formData.append('priority', (product.priority || 1).toString());
+    
+    // Adicionar atributos como JSON
+    if (product.attributes) {
+      formData.append('attributes', JSON.stringify(product.attributes));
+    }
+    
+    // Separar imagens existentes (strings) das novas (Files)
+    const existingImages: string[] = [];
+    const newImages: File[] = [];
+    
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      product.images.forEach((image) => {
+        if (image instanceof File) {
+          newImages.push(image);
+        } else if (typeof image === 'string') {
+          existingImages.push(image);
+        }
+      });
+    }
+    
+    // Adicionar apenas as novas imagens (Files) ao FormData
+    newImages.forEach((image) => {
+      formData.append('images', image);
+    });
+    
+    // Adicionar imagens existentes como JSON para o backend processar
+    if (existingImages.length > 0) {
+      formData.append('existingImages', JSON.stringify(existingImages));
+    }
+    
+    return formData;
+  }
+
+  private getHeadersForFormData(): HttpHeaders {
+    const token = this.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+      // Não definir Content-Type para FormData - o browser define automaticamente
     });
   }
 

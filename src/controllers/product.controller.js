@@ -84,10 +84,52 @@ module.exports = {
   },
 
   async update(req, res) {
-    const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ error: "Product not found" });
-    await product.update(req.body);
-    res.json(product);
+    try {
+      const product = await Product.findByPk(req.params.id);
+      if (!product) return res.status(404).json({ error: "Product not found" });
+
+      const updateData = { ...req.body };
+
+      // Processar imagens existentes e novas
+      let finalImages = [];
+      
+      // Adicionar imagens existentes se fornecidas
+      if (req.body.existingImages) {
+        try {
+          const existingImages = JSON.parse(req.body.existingImages);
+          if (Array.isArray(existingImages)) {
+            finalImages = [...existingImages];
+          }
+        } catch (err) {
+          console.error("Erro ao processar imagens existentes:", err);
+        }
+      }
+      
+      // Adicionar novas imagens se houver arquivos enviados
+      if (req.files && req.files.length > 0) {
+        const newImages = req.files.map((file) => `/uploads/${file.filename}`);
+        finalImages = [...finalImages, ...newImages];
+      }
+      
+      // Se não há imagens existentes nem novas, manter as atuais
+      if (finalImages.length === 0 && product.images) {
+        if (Array.isArray(product.images)) {
+          finalImages = [...product.images];
+        } else if (typeof product.images === 'string') {
+          finalImages = [product.images];
+        }
+      }
+      
+      if (finalImages.length > 0) {
+        updateData.images = finalImages;
+      }
+
+      await product.update(updateData);
+      res.json(product);
+    } catch (err) {
+      console.error("Erro ao atualizar produto:", err);
+      res.status(500).json({ error: "Erro ao atualizar produto" });
+    }
   },
 
   async delete(req, res) {

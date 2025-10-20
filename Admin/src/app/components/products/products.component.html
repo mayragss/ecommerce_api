@@ -264,6 +264,16 @@
               </div>
             </div>
           </div>
+          
+          <!-- Image Upload -->
+          <div class="mb-3">
+            <app-image-upload
+              label="Imagens do Produto"
+              [maxFiles]="5"
+              [images]="productFormData.images || []"
+              (imagesChange)="onImagesChange($event)"
+            ></app-image-upload>
+          </div>
         </div>
         
         <div class="modal-footer">

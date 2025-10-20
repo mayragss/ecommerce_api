@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -22,6 +23,7 @@ export class LoginComponent {
 
   constructor(
     private apiService: ApiService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
@@ -33,7 +35,7 @@ export class LoginComponent {
       this.apiService.login(this.credentials.email, this.credentials.password)
         .subscribe({
           next: (response) => {
-            localStorage.setItem('admin_token', response.token);
+            this.authService.login(response.token);
             this.router.navigate(['/dashboard']);
           },
           error: (error) => {

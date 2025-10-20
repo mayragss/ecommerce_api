@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -40,12 +41,30 @@ import { RouterModule } from '@angular/router';
             Cupons
           </a>
         </nav>
+        
+        <!-- Logout Button -->
+        <div class="mt-4 pt-3 border-top border-secondary">
+          <button class="btn btn-outline-light w-100" (click)="logout()">
+            <i class="fas fa-sign-out-alt me-2"></i>
+            Sair
+          </button>
+        </div>
       </div>
     </div>
   `,
   styles: []
 })
-export class SidebarComponent {}
+export class SidebarComponent {
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+}
 
 
 

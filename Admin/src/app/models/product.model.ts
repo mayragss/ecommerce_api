@@ -7,7 +7,7 @@ export interface Product {
   category: string;
   collection?: string;
   attributes?: any;
-  images?: any;
+  images?: string[];
   imageUrl?: string;
   sold?: number;
   views?: number;
@@ -24,11 +24,12 @@ export interface ProductFormData {
   category: string;
   collection?: string;
   attributes?: any;
-  images?: any;
+  images?: (string | File)[];
   imageUrl?: string;
   stock: number;
   isActive: boolean;
   priority?: number;
 }
+
 
 
