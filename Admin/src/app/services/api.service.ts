@@ -10,7 +10,7 @@ import { Coupon, CouponFormData } from '../models/coupon.model';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:3000'; // URL da sua API
+  private baseUrl = 'https://api-ecommerce.maygomes.com'; // URL da sua API
   private token = localStorage.getItem('admin_token');
 
   constructor(private http: HttpClient) {}
