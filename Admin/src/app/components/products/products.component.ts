@@ -159,11 +159,12 @@ export class ProductsComponent implements OnInit {
       }
       
       if (imageUrl) {
-        // Se a URL não começa com http, adicionar o baseUrl do backend
-        if (!imageUrl.startsWith('http')) {
-          imageUrl = `http://localhost:3000${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+        // Se já é uma URL completa, usar diretamente
+        if (imageUrl.startsWith('http')) {
+          return imageUrl;
         }
-        return imageUrl;
+        // Se não é URL completa, construir a URL completa
+        return `https://api-ecommerce.maygomes.com${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
       }
     }
     return '';
