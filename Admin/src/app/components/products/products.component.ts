@@ -147,37 +147,26 @@ export class ProductsComponent implements OnInit {
 
   getProductImage(product: Product): string {
     if (product.images) {
-      let imagesArray: string[] = [];
+      let imageUrl = '';
       
-      // Se images é uma string, converter para array
-      if (Array.isArray(product.images)) {
-        imagesArray = product.images;
-      } else if (typeof product.images === 'string') {
-        // Limpar aspas e colchetes se existirem
-        let cleanImage = String(product.images).trim();
-        if (cleanImage.startsWith('[') && cleanImage.endsWith(']')) {
-          cleanImage = cleanImage.slice(1, -1);
-        }
-        if (cleanImage.startsWith('"') && cleanImage.endsWith('"')) {
-          cleanImage = cleanImage.slice(1, -1);
-        }
-        imagesArray = [cleanImage];
+      // Se images é um array, pegar a primeira imagem
+      if (Array.isArray(product.images) && product.images.length > 0) {
+        imageUrl = product.images[0];
+      } 
+      // Se images é uma string, usar diretamente
+      else if (typeof product.images === 'string') {
+        imageUrl = product.images;
       }
       
-      if (imagesArray.length > 0 && imagesArray[0]) {
-        // Garantir que a URL seja absoluta se necessário
-        let imageUrl = imagesArray[0];
-        if (imageUrl.startsWith('/uploads/') || imageUrl.startsWith('uploads/')) {
-          // Se é uma URL relativa, adicionar o baseUrl do backend
+      if (imageUrl) {
+        // Se a URL não começa com http, adicionar o baseUrl do backend
+        if (!imageUrl.startsWith('http')) {
           imageUrl = `http://localhost:3000${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
-        } else if (imageUrl.startsWith('images/')) {
-          // Se começa com images/, converter para uploads
-          imageUrl = `http://localhost:3000/uploads/${imageUrl}`;
         }
         return imageUrl;
       }
     }
-    return this.getPlaceholderImage();
+    return '';
   }
 
   getPlaceholderImage(): string {
@@ -189,9 +178,6 @@ export class ProductsComponent implements OnInit {
     return `data:image/svg+xml;base64,${btoa(svg)}`;
   }
 
-  onImageError(event: any) {
-    event.target.src = this.getPlaceholderImage();
-  }
 
   getStockClass(stock: number): string {
     if (stock > 10) return 'stock-high';
@@ -332,49 +318,17 @@ export class ProductsComponent implements OnInit {
   private normalizeImages(images: any): (string | File)[] {
     if (!images) return [];
     
-    // Se já é um array, limpar e retornar
+    // Se já é um array, retornar como está
     if (Array.isArray(images)) {
-      return images.map(img => this.cleanImageString(img));
+      return images;
     }
     
-    // Se é uma string, limpar e converter para array
+    // Se é uma string, converter para array
     if (typeof images === 'string') {
-      const cleaned = this.cleanImageString(images);
-      return cleaned ? [cleaned] : [];
-    }
-    
-    // Se é um objeto com propriedades de array, tentar extrair
-    if (typeof images === 'object' && images !== null) {
-      // Tentar diferentes propriedades comuns
-      const possibleArrays = images.images || images.files || images.urls || [];
-      if (Array.isArray(possibleArrays)) {
-        return possibleArrays.map(img => this.cleanImageString(img));
-      }
+      return [images];
     }
     
     return [];
   }
 
-  private cleanImageString(image: any): string {
-    if (typeof image !== 'string') return '';
-    
-    let cleaned = image.trim();
-    
-    // Remover colchetes se existirem
-    if (cleaned.startsWith('[') && cleaned.endsWith(']')) {
-      cleaned = cleaned.slice(1, -1);
-    }
-    
-    // Remover aspas duplas se existirem
-    if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
-      cleaned = cleaned.slice(1, -1);
-    }
-    
-    // Remover aspas simples se existirem
-    if (cleaned.startsWith("'") && cleaned.endsWith("'")) {
-      cleaned = cleaned.slice(1, -1);
-    }
-    
-    return cleaned.trim();
-  }
 }

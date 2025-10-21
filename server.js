@@ -36,7 +36,6 @@ app.use(cors({
 // app.options('*', cors()); // Removido - causava erro no path-to-regexp
 
 app.use(morgan("dev"));
-app.use("/uploads", express.static(path.join(__dirname, "src", "uploads")));
 
 const { sequelize } = require("./src/models");
 
@@ -76,6 +75,19 @@ app.use("/admin", authenticate, adminRoutes);
 app.use("/auth", authRoutes);
 
 app.get("/health", (req, res) => res.json({ status: "API online" }));
+
+// Rota para servir imagens
+app.get("/uploads/:image", (req, res) => {
+  const imageName = req.params.image;
+  const imagePath = path.join(__dirname, "src", "uploads", imageName);
+  
+  // Verificar se o arquivo existe
+  if (require('fs').existsSync(imagePath)) {
+    res.sendFile(imagePath);
+  } else {
+    res.status(404).json({ error: "Image not found" });
+  }
+});
 
 // Load Swagger AFTER all routes are defined
 require("./src/swagger")(app);
