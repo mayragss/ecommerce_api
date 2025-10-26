@@ -15,10 +15,12 @@ app.use(express.json());
 
 const allowedOrigins = [
   'http://localhost:4200',         // ambiente local
-  'https://gaithgio.com' ,    // produção
-  'https://www.gaithgio.com' ,    // produção
-  'https://www.admin.gaithgio.com' ,    // produção
-  'https://admin.gaithgio.com' ,    // produção
+  'http://localhost:3000',         // API local
+  'https://gaithgio.com',          // produção
+  'https://www.gaithgio.com',      // produção
+  'https://admin.gaithgio.com',    // produção
+  'https://www.admin.gaithgio.com',// produção
+  'https://api-ecommerce.maygomes.com', // API produção
 ];
 
 app.use(cors({

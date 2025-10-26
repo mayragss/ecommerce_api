@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { User } from '../models/user.model';
 import { Product, ProductFormData } from '../models/product.model';
 import { Order } from '../models/order.model';
@@ -10,7 +11,7 @@ import { Coupon, CouponFormData } from '../models/coupon.model';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:3000'; // URL local da API
+  private baseUrl = environment.API_URL;
 
   constructor(private http: HttpClient) {}
 
