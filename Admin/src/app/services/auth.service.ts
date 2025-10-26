@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, interval } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -7,8 +8,11 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.checkAuthStatus());
   public isLoggedIn$ = this.isLoggedInSubject.asObservable();
+  private tokenCheckInterval: any;
 
-  constructor() {}
+  constructor() {
+    this.startTokenCheck();
+  }
 
   private checkAuthStatus(): boolean {
     const token = localStorage.getItem('admin_token');
@@ -30,14 +34,34 @@ export class AuthService {
     }
   }
 
+  private startTokenCheck(): void {
+    // Verificar token a cada 30 segundos
+    this.tokenCheckInterval = setInterval(() => {
+      if (this.isLoggedInSubject.value) {
+        const isValid = this.checkAuthStatus();
+        if (!isValid) {
+          this.logout();
+        }
+      }
+    }, 30000);
+  }
+
+  private stopTokenCheck(): void {
+    if (this.tokenCheckInterval) {
+      clearInterval(this.tokenCheckInterval);
+    }
+  }
+
   login(token: string): void {
     localStorage.setItem('admin_token', token);
     this.isLoggedInSubject.next(true);
+    this.startTokenCheck();
   }
 
   logout(): void {
     localStorage.removeItem('admin_token');
     this.isLoggedInSubject.next(false);
+    this.stopTokenCheck();
   }
 
   isLoggedIn(): boolean {

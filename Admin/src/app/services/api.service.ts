@@ -10,7 +10,7 @@ import { Coupon, CouponFormData } from '../models/coupon.model';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'https://api-ecommerce.maygomes.com'; // URL da sua API
+  private baseUrl = 'http://localhost:3000'; // URL local da API
 
   constructor(private http: HttpClient) {}
 
@@ -123,13 +123,21 @@ export class ApiService {
       });
     }
     
+    console.log('=== FORM DATA DEBUG ===');
+    console.log('Total images:', product.images?.length || 0);
+    console.log('New images (Files):', newImages.length);
+    console.log('Existing images (strings):', existingImages.length);
+    console.log('New images details:', newImages.map(img => ({ name: img.name, size: img.size, type: img.type })));
+    
     // Adicionar apenas as novas imagens (Files) ao FormData
-    newImages.forEach((image) => {
+    newImages.forEach((image, index) => {
+      console.log(`Adding image ${index}:`, image.name, image.size, image.type);
       formData.append('images', image);
     });
     
     // Adicionar imagens existentes como JSON para o backend processar
     if (existingImages.length > 0) {
+      console.log('Existing images:', existingImages);
       formData.append('existingImages', JSON.stringify(existingImages));
     }
     

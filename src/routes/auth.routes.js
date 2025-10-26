@@ -52,6 +52,7 @@ const { User } = require("../models"); // ajuste conforme seu setup Sequelize
  */
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
+  console.log('login');
   try {
     if (!email || !password) {
       return res.status(400).json({ error: "Email e senha são obrigatórios." });
@@ -62,15 +63,12 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Credenciais inválidas." });
     }
     
-   /* const passwordValid = await bcrypt.compare(password, user.passwordHash);
+    const passwordValid = await bcrypt.compare(password, user.passwordHash);
     if (!passwordValid) {
-      return res.status(400).json({ error: "Credenciais inválidas." });
-    }*/
-    if(password != user.passwordHash){
       return res.status(400).json({ error: "Credenciais inválidas." });
     }
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: 'admin' },
+      { id: user.id, email: user.email, role: user.role || 'user', name: user.name },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );

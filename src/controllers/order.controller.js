@@ -10,14 +10,18 @@ module.exports = {
                         attributes: ['id', 'name', 'email']
                     },
                     {
-                        model: Product,
-                        through: { attributes: ['quantity', 'price'] }
+                        model: OrderItem,
+                        include: [{
+                            model: Product,
+                            attributes: ['id', 'name', 'price', 'images']
+                        }]
                     }
                 ],
                 order: [['createdAt', 'DESC']]
             });
             res.json(orders);
         } catch (error) {
+            console.error("Erro ao buscar pedidos:", error);
             res.status(500).json({ error: error.message });
         }
     },
@@ -31,8 +35,11 @@ module.exports = {
                         attributes: ['id', 'name', 'email', 'phone']
                     },
                     {
-                        model: Product,
-                        through: { attributes: ['quantity', 'price'] }
+                        model: OrderItem,
+                        include: [{
+                            model: Product,
+                            attributes: ['id', 'name', 'price', 'images', 'description']
+                        }]
                     }
                 ]
             });
@@ -43,30 +50,92 @@ module.exports = {
             
             res.json(order);
         } catch (error) {
+            console.error("Erro ao buscar pedido:", error);
             res.status(500).json({ error: error.message });
         }
     },
 
     async create(req, res) {
-        const { userId, items } = req.body;
-        const user = await User.findByPk(userId);
-        if (!user) return res.status(404).json({ error: "User not found" });
-
-        const order = await Order.create({ UserId: userId });
-
-        for (const item of items) {
-            const product = await Product.findByPk(item.productId);
-            if (product) {
-                await OrderItem.create({
-                    OrderId: order.id,
+        try {
+            const { items, paymentMethod = 'credit_card' } = req.body;
+            const userId = req.user.id; // ID do usuário vem do token
+            
+            // Validações
+            if (!items || !Array.isArray(items) || items.length === 0) {
+                return res.status(400).json({ error: "Items são obrigatórios" });
+            }
+            
+            // Verificar se o usuário existe
+            const user = await User.findByPk(userId);
+            if (!user) {
+                return res.status(404).json({ error: "Usuário não encontrado" });
+            }
+            
+            // Calcular total e validar produtos
+            let total = 0;
+            const orderItems = [];
+            
+            for (const item of items) {
+                if (!item.productId || !item.quantity) {
+                    return res.status(400).json({ error: "Cada item deve ter productId e quantity" });
+                }
+                
+                const product = await Product.findByPk(item.productId);
+                if (!product) {
+                    return res.status(404).json({ error: `Produto ${item.productId} não encontrado` });
+                }
+                
+                if (product.stock < item.quantity) {
+                    return res.status(400).json({ error: `Estoque insuficiente para o produto ${product.name}` });
+                }
+                
+                const itemTotal = product.price * item.quantity;
+                total += itemTotal;
+                
+                orderItems.push({
                     ProductId: product.id,
                     quantity: item.quantity,
-                    price: product.price
+                    unitPrice: product.price
                 });
             }
+            
+            // Criar pedido
+            const order = await Order.create({ 
+                UserId: userId,
+                total: total,
+                status: 'pending',
+                paymentMethod: paymentMethod
+            });
+            
+            // Criar itens do pedido
+            for (const item of orderItems) {
+                await OrderItem.create({
+                    OrderId: order.id,
+                    ProductId: item.ProductId,
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice
+                });
+                
+                // Atualizar estoque do produto
+                const product = await Product.findByPk(item.ProductId);
+                await product.update({ stock: product.stock - item.quantity });
+            }
+            
+            res.status(201).json({ 
+                message: "Pedido criado com sucesso", 
+                order: {
+                    id: order.id,
+                    total: order.total,
+                    status: order.status,
+                    paymentMethod: order.paymentMethod,
+                    items: orderItems
+                }
+            });
+            
+        } catch (error) {
+            console.error("Erro ao criar pedido:", error);
+            res.status(500).json({ error: "Erro interno do servidor" });
         }
-
-        res.status(201).json({ message: "Order created", orderId: order.id });
     },
 
     async getByUser(req, res) {

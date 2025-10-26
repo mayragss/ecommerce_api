@@ -159,12 +159,26 @@ export class ProductsComponent implements OnInit {
       }
       
       if (imageUrl) {
+        // Limpar HTML entities e caracteres extras
+        let cleanImageUrl = imageUrl
+          .replace(/&quot;/g, '"')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/\[|\]/g, '') // Remove colchetes
+          .replace(/^"|"$/g, '') // Remove aspas do início e fim
+          .trim();
+        
         // Se já é uma URL completa, usar diretamente
-        if (imageUrl.startsWith('http')) {
-          return imageUrl;
+        if (cleanImageUrl.startsWith('http')) {
+          return cleanImageUrl;
+        }
+        // Se começa com /uploads, construir a URL completa
+        if (cleanImageUrl.startsWith('/uploads')) {
+          return `http://localhost:3000${cleanImageUrl}`;
         }
         // Se não é URL completa, construir a URL completa
-        return `https://api-ecommerce.maygomes.com${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+        return `http://localhost:3000${cleanImageUrl.startsWith('/') ? '' : '/'}${cleanImageUrl}`;
       }
     }
     return '';
@@ -321,11 +335,11 @@ export class ProductsComponent implements OnInit {
     
     // Se já é um array, retornar como está
     if (Array.isArray(images)) {
-      return images;
+      return images.filter(img => img && (typeof img === 'string' || img instanceof File));
     }
     
     // Se é uma string, converter para array
-    if (typeof images === 'string') {
+    if (typeof images === 'string' && images.trim()) {
       return [images];
     }
     

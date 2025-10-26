@@ -2,6 +2,7 @@ const router = require("express").Router();
 const controller = require("../controllers/product.controller");
 const { authenticate, authorizeAdmin } = require("../middleware/auth");
 const upload = require("../middleware/upload.middleware");
+const multer = require("multer");
 
 /**
  * @swagger
@@ -122,7 +123,20 @@ router.get("/:id", controller.getById);
  *       401:
  *         description: Não autorizado
  */
-router.post("/", authenticate, authorizeAdmin,  upload.array("images", 5), controller.create);
+router.post("/", authenticate, authorizeAdmin, upload.array("images", 5), (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'Arquivo muito grande. Máximo 5MB por arquivo.' });
+    }
+    if (err.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({ error: 'Muitos arquivos. Máximo 5 imagens.' });
+    }
+  }
+  if (err) {
+    return res.status(400).json({ error: err.message });
+  }
+  next();
+}, controller.create);
 
 /**
  * @swagger
@@ -154,7 +168,20 @@ router.post("/", authenticate, authorizeAdmin,  upload.array("images", 5), contr
  *       404:
  *         description: Produto não encontrado
  */
-router.put("/:id", authenticate, authorizeAdmin, upload.array("images", 5), controller.update);
+router.put("/:id", authenticate, authorizeAdmin, upload.array("images", 5), (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'Arquivo muito grande. Máximo 5MB por arquivo.' });
+    }
+    if (err.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({ error: 'Muitos arquivos. Máximo 5 imagens.' });
+    }
+  }
+  if (err) {
+    return res.status(400).json({ error: err.message });
+  }
+  next();
+}, controller.update);
 
 /**
  * @swagger

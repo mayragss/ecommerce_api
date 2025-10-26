@@ -178,4 +178,34 @@ router.post("/register", controller.register);
  */
 router.post("/login", controller.login);
 
+/**
+ * @swagger
+ * /users/check-email:
+ *   get:
+ *     summary: Check if email is available
+ *     tags: [Users]
+ *     parameters:
+ *       - name: email
+ *         in: query
+ *         description: Email to check
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Email availability status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 available:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Email parameter missing
+ */
+router.get("/check-email", controller.checkEmail);
+
 module.exports = router;

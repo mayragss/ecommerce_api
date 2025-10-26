@@ -1,0 +1,55 @@
+[33mcommit 3caa51b5bd00ea924c865b54c3917008f275387a[m
+Author: mayragsss <mayra.g.dias@hotmail.com>
+Date:   Sun Oct 19 11:45:36 2025 +0100
+
+    add admin panell
+
+ADMIN-SETUP.md
+Admin/.gitignore
+Admin/README.md
+Admin/angular.json
+Admin/package.json
+Admin/src/app/app.component.ts
+Admin/src/app/app.routes.ts
+Admin/src/app/components/coupons/coupons.component.html
+Admin/src/app/components/coupons/coupons.component.scss
+Admin/src/app/components/coupons/coupons.component.ts
+Admin/src/app/components/dashboard/dashboard.component.html
+Admin/src/app/components/dashboard/dashboard.component.scss
+Admin/src/app/components/dashboard/dashboard.component.ts
+Admin/src/app/components/login/login.component.html
+Admin/src/app/components/login/login.component.scss
+Admin/src/app/components/login/login.component.ts
+Admin/src/app/components/navbar/navbar.component.ts
+Admin/src/app/components/orders/orders.component.html
+Admin/src/app/components/orders/orders.component.scss
+Admin/src/app/components/orders/orders.component.ts
+Admin/src/app/components/products/products.component.html
+Admin/src/app/components/products/products.component.scss
+Admin/src/app/components/products/products.component.ts
+Admin/src/app/components/sidebar/sidebar.component.ts
+Admin/src/app/components/users/users.component.html
+Admin/src/app/components/users/users.component.scss
+Admin/src/app/components/users/users.component.ts
+Admin/src/app/guards/auth.guard.ts
+Admin/src/app/models/coupon.model.ts
+Admin/src/app/models/order.model.ts
+Admin/src/app/models/product.model.ts
+Admin/src/app/models/user.model.ts
+Admin/src/app/services/api.service.ts
+Admin/src/index.html
+Admin/src/main.ts
+Admin/src/styles.scss
+Admin/tsconfig.app.json
+Admin/tsconfig.json
+Admin/tsconfig.spec.json
+database-inserts.sql
+package-lock.json
+server.js
+src/controllers/coupon.controller.js
+src/controllers/order.controller.js
+src/routes/admin.routes.js
+src/routes/coupon.routes.js
+src/routes/order.routes.js
+src/routes/product.routes.js
+src/routes/user.routes.js

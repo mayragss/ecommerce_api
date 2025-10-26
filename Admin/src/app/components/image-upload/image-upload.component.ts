@@ -13,10 +13,11 @@ import { CommonModule } from '@angular/common';
       <div 
         class="upload-area"
         [class.dragover]="isDragOver"
+        [class.disabled]="images.length >= maxFiles"
         (dragover)="onDragOver($event)"
         (dragleave)="onDragLeave($event)"
         (drop)="onDrop($event)"
-        (click)="fileInput.click()"
+        (click)="images.length < maxFiles ? fileInput.click() : null"
       >
         <div class="upload-content" *ngIf="!images.length">
           <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
@@ -24,9 +25,16 @@ import { CommonModule } from '@angular/common';
           <small class="text-muted">Máximo {{ maxFiles }} imagens (JPG, PNG, GIF)</small>
         </div>
         
-        <div class="upload-content" *ngIf="images.length > 0">
+        <div class="upload-content" *ngIf="images.length > 0 && images.length < maxFiles">
           <i class="fas fa-plus fa-2x text-muted mb-2"></i>
           <p class="text-muted mb-0">Adicionar mais imagens</p>
+          <small class="text-muted">{{ images.length }}/{{ maxFiles }} imagens</small>
+        </div>
+        
+        <div class="upload-content" *ngIf="images.length >= maxFiles">
+          <i class="fas fa-check fa-2x text-success mb-2"></i>
+          <p class="text-success mb-0">Máximo de imagens atingido</p>
+          <small class="text-muted">{{ images.length }}/{{ maxFiles }} imagens</small>
         </div>
       </div>
       
@@ -189,6 +197,22 @@ import { CommonModule } from '@angular/common';
       opacity: 0.5;
       cursor: not-allowed;
     }
+    
+    .text-success {
+      color: #28a745 !important;
+    }
+    
+    .upload-area.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: #f8f9fa;
+    }
+    
+    .upload-area.disabled:hover {
+      border-color: #dee2e6;
+      background-color: #f8f9fa;
+      transform: none;
+    }
   `]
 })
 export class ImageUploadComponent implements OnInit, OnChanges {
@@ -223,7 +247,9 @@ export class ImageUploadComponent implements OnInit, OnChanges {
 
   onDragOver(event: DragEvent) {
     event.preventDefault();
-    this.isDragOver = true;
+    if (this.images.length < this.maxFiles) {
+      this.isDragOver = true;
+    }
   }
 
   onDragLeave(event: DragEvent) {
@@ -234,6 +260,11 @@ export class ImageUploadComponent implements OnInit, OnChanges {
   onDrop(event: DragEvent) {
     event.preventDefault();
     this.isDragOver = false;
+    
+    if (this.images.length >= this.maxFiles) {
+      this.errorMessage = `Máximo de ${this.maxFiles} imagens permitidas`;
+      return;
+    }
     
     const files = event.dataTransfer?.files;
     if (files) {
@@ -253,7 +284,7 @@ export class ImageUploadComponent implements OnInit, OnChanges {
     
     // Validar número de arquivos
     if (this.images.length + files.length > this.maxFiles) {
-      this.errorMessage = `Máximo de ${this.maxFiles} imagens permitidas`;
+      this.errorMessage = `Máximo de ${this.maxFiles} imagens permitidas. Você já tem ${this.images.length} imagens.`;
       return;
     }
 
@@ -273,6 +304,12 @@ export class ImageUploadComponent implements OnInit, OnChanges {
     // Adicionar arquivos
     this.images = [...this.images, ...files];
     this.imagesChange.emit(this.images);
+    
+    // Limpar o input para permitir selecionar os mesmos arquivos novamente
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   }
 
   removeImage(index: number) {
@@ -293,7 +330,26 @@ export class ImageUploadComponent implements OnInit, OnChanges {
 
   getImageUrl(image: string | File): string {
     if (typeof image === 'string') {
-      return image;
+      // Limpar HTML entities e caracteres extras
+      let cleanImage = image
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/\[|\]/g, '') // Remove colchetes
+        .replace(/^"|"$/g, '') // Remove aspas do início e fim
+        .trim();
+      
+      // Se já é uma URL completa, usar diretamente
+      if (cleanImage.startsWith('http')) {
+        return cleanImage;
+      }
+      // Se começa com /uploads, construir a URL completa
+      if (cleanImage.startsWith('/uploads')) {
+        return `http://localhost:3000${cleanImage}`;
+      }
+      // Se não é URL completa, construir a URL completa
+      return `http://localhost:3000${cleanImage.startsWith('/') ? '' : '/'}${cleanImage}`;
     }
     return URL.createObjectURL(image);
   }

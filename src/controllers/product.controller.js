@@ -6,7 +6,7 @@ module.exports = {
     try {
       const { name, description, price, stock, category, collection, attributes } = req.body;
 
-      const images = req.files?.map((file) => `/uploads/${file.filename}`) || [];
+      const images = req.files?.map((file) => `https://api-ecommerce.maygomes.com/uploads/${file.filename}`) || [];
 
       const newProduct = await Product.create({
         name,
@@ -85,6 +85,11 @@ module.exports = {
 
   async update(req, res) {
     try {
+      console.log("=== UPDATE PRODUCT DEBUG ===");
+      console.log("req.files:", req.files);
+      console.log("req.files length:", req.files ? req.files.length : 0);
+      console.log("req.body:", req.body);
+      
       const product = await Product.findByPk(req.params.id);
       if (!product) return res.status(404).json({ error: "Product not found" });
 
@@ -97,6 +102,7 @@ module.exports = {
       if (req.body.existingImages) {
         try {
           const existingImages = JSON.parse(req.body.existingImages);
+          console.log("Existing images parsed:", existingImages);
           if (Array.isArray(existingImages)) {
             finalImages = [...existingImages];
           }
@@ -107,12 +113,17 @@ module.exports = {
       
       // Adicionar novas imagens se houver arquivos enviados
       if (req.files && req.files.length > 0) {
-        const newImages = req.files.map((file) => `/uploads/${file.filename}`);
+        console.log("Arquivos recebidos:", req.files.length);
+        console.log("Arquivos detalhes:", req.files.map(f => ({ filename: f.filename, originalname: f.originalname, size: f.size })));
+        
+        const newImages = req.files.map((file) => `https://api-ecommerce.maygomes.com/uploads/${file.filename}`);
         finalImages = [...finalImages, ...newImages];
+        console.log("Novas imagens URLs:", newImages);
       }
       
       // Se não há imagens existentes nem novas, manter as atuais
       if (finalImages.length === 0 && product.images) {
+        console.log("Mantendo imagens atuais do produto:", product.images);
         if (Array.isArray(product.images)) {
           finalImages = [...product.images];
         } else if (typeof product.images === 'string') {
@@ -120,11 +131,14 @@ module.exports = {
         }
       }
       
+      console.log("Final images array:", finalImages);
+      
       if (finalImages.length > 0) {
         updateData.images = finalImages;
       }
 
       await product.update(updateData);
+      console.log("Produto atualizado com sucesso");
       res.json(product);
     } catch (err) {
       console.error("Erro ao atualizar produto:", err);

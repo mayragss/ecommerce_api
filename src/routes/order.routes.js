@@ -50,7 +50,7 @@ router.get("/", authenticate, authorizeAdmin, controller.getAll);
  *       400:
  *         description: Invalid input
  */
-router.post("/", controller.create);
+router.post("/", authenticate, controller.create);
 
 /**
  * @swagger

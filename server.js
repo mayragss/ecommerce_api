@@ -62,6 +62,8 @@ const paymentRoutes = require("./src/routes/payment.routes");
 const invoiceRoutes = require("./src/routes/invoice.routes");
 const adminRoutes = require("./src/routes/admin.routes");
 const couponRoutes = require("./src/routes/coupon.routes");
+const memberRoutes = require("./src/routes/member.routes");
+const addressRoutes = require("./src/routes/address.routes");
 
 app.use("/users", userRoutes);
 app.use("/products", productRoutes);
@@ -72,6 +74,8 @@ app.use("/payments", paymentRoutes);
 app.use("/invoices", invoiceRoutes);
 app.use("/coupons", couponRoutes);
 app.use("/admin", authenticate, adminRoutes);
+app.use("/member", memberRoutes);
+app.use("/address", addressRoutes);
 app.use("/auth", authRoutes);
 
 app.get("/health", (req, res) => res.json({ status: "API online" }));
