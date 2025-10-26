@@ -1,5 +1,4 @@
-# API Configuration
-API_URL=https://api-ecommerce.maygomes.com
-
-# Environment
-PRODUCTION=true
+export const environment = {
+  production: true,
+  API_URL: 'https://api-ecommerce.maygomes.com'
+};
