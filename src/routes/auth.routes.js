@@ -52,7 +52,7 @@ const { User } = require("../models"); // ajuste conforme seu setup Sequelize
  */
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log('login');
+  
   try {
     if (!email || !password) {
       return res.status(400).json({ error: "Email e senha são obrigatórios." });

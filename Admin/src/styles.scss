@@ -3,8 +3,28 @@
 @import 'bootstrap/scss/bootstrap';
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Montserrat', sans-serif;
   background-color: #f8f9fa;
+}
+
+// Aplicar Montserrat para todos os elementos por padrão
+* {
+  font-family: 'Montserrat', sans-serif;
+}
+
+// Aplicar Cinzel para todos os títulos
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.modal-title,
+.text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-h6 {
+  font-family: 'Cinzel', serif !important;
+}
+
+// Manter Courier New para códigos especiais (cupons, IDs, etc.)
+.order-id,
+.coupon-code,
+.coupon-code-display {
+  font-family: 'Courier New', monospace !important;
 }
 
 .sidebar {
