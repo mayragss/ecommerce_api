@@ -227,9 +227,19 @@ export class UsersComponent implements OnInit {
         this.filterUsers();
         this.closeModal();
         this.saving = false;
+        // Reset form data
+        this.userFormData = {
+          name: '',
+          email: '',
+          phone: '',
+          role: 'user',
+          password: ''
+        };
+        this.editingUser = null;
       },
       error: (error) => {
         console.error('Error creating user:', error);
+        alert(error.error?.message || 'Erro ao criar usuário. Por favor, tente novamente.');
         this.saving = false;
       }
     });
@@ -239,9 +249,16 @@ export class UsersComponent implements OnInit {
     if (!this.editingUser) return;
     
     this.saving = true;
-    const updateData: any = { ...this.userFormData };
-    if (!updateData.password) {
-      updateData.password = undefined;
+    const updateData: any = {
+      name: this.userFormData.name,
+      email: this.userFormData.email,
+      phone: this.userFormData.phone || undefined,
+      role: this.userFormData.role
+    };
+    
+    // Apenas incluir senha se foi fornecida e não está vazia
+    if (this.userFormData.password && this.userFormData.password.trim() !== '') {
+      updateData.password = this.userFormData.password;
     }
     
     this.apiService.updateUser(this.editingUser.id, updateData).subscribe({
@@ -253,9 +270,19 @@ export class UsersComponent implements OnInit {
         }
         this.closeModal();
         this.saving = false;
+        // Reset form data
+        this.userFormData = {
+          name: '',
+          email: '',
+          phone: '',
+          role: 'user',
+          password: ''
+        };
+        this.editingUser = null;
       },
       error: (error) => {
         console.error('Error updating user:', error);
+        alert(error.error?.message || 'Erro ao atualizar usuário. Por favor, tente novamente.');
         this.saving = false;
       }
     });

@@ -4,7 +4,6 @@
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center">
         <h1 class="h3 mb-0 text-gray-800">
-          <i class="fas fa-box me-2"></i>
           Gestão de Produtos
         </h1>
         <button class="btn btn-primary" (click)="openProductModal()">
@@ -264,6 +263,38 @@
             </div>
           </div>
           
+          <!-- Attributes -->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="productSize" class="form-label">Tamanhos</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="productSize"
+                  [(ngModel)]="productSize"
+                  name="productSize"
+                  placeholder="P, M, G (separados por vírgula)"
+                >
+                <div class="form-text">Digite os tamanhos separados por vírgula. Exemplo: P, M, G</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="productColors" class="form-label">Cor</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="productColors"
+                  [(ngModel)]="productColors"
+                  name="productColors"
+                  placeholder="Mangaba ou Mangaba, Ébano (separadas por vírgula)"
+                >
+                <div class="form-text">Digite a cor ou cores separadas por vírgula. Exemplo: Mangaba ou Mangaba, Ébano</div>
+              </div>
+            </div>
+          </div>
+          
           <!-- Image Upload -->
           <div class="mb-3">
             <app-image-upload
@@ -284,7 +315,6 @@
             (click)="deleteProductFromModal()"
             [disabled]="saving"
           >
-            <i class="fas fa-trash me-2"></i>
             Apagar
           </button>
           <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid || saving">
@@ -315,7 +345,6 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-danger" (click)="confirmDelete()">
-          <i class="fas fa-trash me-2"></i>
           Excluir
         </button>
       </div>

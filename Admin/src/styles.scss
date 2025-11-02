@@ -41,6 +41,46 @@ i[class^="fa"],
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }
 
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 250px;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+  
+  .sidebar.show {
+    left: 0;
+  }
+  
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+  
+  .sidebar-overlay.show {
+    display: block;
+  }
+  
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .card {
+    margin-bottom: 1rem;
+  }
+}
+
 .sidebar .nav-link {
   color: rgba(255,255,255,0.8);
   padding: 12px 20px;
@@ -56,10 +96,31 @@ i[class^="fa"],
   transform: translateX(5px);
 }
 
+.sidebar .logout-btn {
+  background: transparent !important;
+  color: white !important;
+}
+
+.sidebar .logout-btn:hover {
+  background-color: rgba(255,255,255,0.1) !important;
+}
+
 .main-content {
   background-color: #f8f9fa;
   min-height: 100vh;
   padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 15px 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .main-content {
+    padding: 10px 5px;
+  }
 }
 
 .card {

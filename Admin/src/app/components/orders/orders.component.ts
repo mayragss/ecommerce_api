@@ -44,11 +44,15 @@ export class OrdersComponent implements OnInit {
     this.loading = true;
     this.apiService.getOrders().subscribe({
       next: (orders) => {
-        // Mapear User para user para manter compatibilidade
-        this.orders = orders.map(order => ({
-          ...order,
-          user: order.User || order.user
-        }));
+        // Mapear User para user e garantir que items esteja disponível
+        this.orders = orders.map(order => {
+          const mappedOrder = {
+            ...order,
+            user: order.User || order.user,
+            items: order.items || (order as any).OrderItems || (order as any).items || []
+          };
+          return mappedOrder;
+        });
         this.filterOrders();
         this.loading = false;
       },
@@ -198,16 +202,24 @@ export class OrdersComponent implements OnInit {
   }
 
   getOrderItemsCount(order: Order): number {
-    if (order.items && Array.isArray(order.items)) {
-      return order.items.length;
+    // Verificar diferentes possíveis nomes de propriedade
+    const items = order.items || (order as any).OrderItems || (order as any).items || [];
+    
+    if (Array.isArray(items) && items.length > 0) {
+      return items.length;
     }
+    
     return 0;
   }
 
   getOrderItems(order: Order): any[] {
-    if (order.items && Array.isArray(order.items)) {
-      return order.items;
+    // Verificar diferentes possíveis nomes de propriedade
+    const items = order.items || (order as any).OrderItems || (order as any).items || [];
+    
+    if (Array.isArray(items)) {
+      return items;
     }
+    
     return [];
   }
 

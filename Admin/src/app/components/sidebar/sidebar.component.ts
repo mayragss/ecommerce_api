@@ -35,15 +35,17 @@ import { AuthService } from '../../services/auth.service';
             Pedidos
           </a>
           
+          <!--
           <a class="nav-link" routerLink="/coupons" routerLinkActive="active">
             <i class="fas fa-ticket-alt me-2"></i>
             Cupons
           </a>
+          -->
         </nav>
         
         <!-- Logout Button -->
         <div class="mt-4 pt-3 border-top border-secondary">
-          <button class="btn btn-outline-light w-100" (click)="logout()">
+          <button class="btn btn-outline-light w-100 logout-btn" (click)="logout()">
             <i class="fas fa-sign-out-alt me-2"></i>
             Sair
           </button>

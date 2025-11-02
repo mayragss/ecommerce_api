@@ -93,6 +93,11 @@
   color: #000;
 }
 
+// Coluna Cliente alinhada à esquerda (apenas o conteúdo, não o cabeçalho)
+.table tbody tr td:nth-child(2) {
+  text-align: left;
+}
+
 .pagination {
   margin-bottom: 0;
 }

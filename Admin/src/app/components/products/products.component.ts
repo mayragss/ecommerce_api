@@ -42,6 +42,9 @@ export class ProductsComponent implements OnInit {
   
   saving = false;
   loading = false;
+  attributesJson: string = '';
+  productSize: string = '';
+  productColors: string = '';
 
   constructor(
     private apiService: ApiService,
@@ -212,10 +215,66 @@ export class ProductsComponent implements OnInit {
     return 'badge-out-of-stock';
   }
 
+  private parseAttributes(attributes: any): any {
+    if (!attributes) return {};
+    
+    // Se já é um objeto, retornar direto
+    if (typeof attributes === 'object' && !Array.isArray(attributes)) {
+      return attributes;
+    }
+    
+    // Se é string, tentar parsear
+    if (typeof attributes === 'string') {
+      try {
+        let attrStr = attributes.trim();
+        
+        // Remover múltiplas escapadas iterativamente
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        while (attempts < maxAttempts && typeof attrStr === 'string' && attrStr.trim()) {
+          // Verificar se começa e termina com aspas duplas
+          const trimmed = attrStr.trim();
+          if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+            try {
+              attrStr = JSON.parse(attrStr);
+              attempts++;
+              continue;
+            } catch (e) {
+              // Não conseguiu mais parsear, tentar como JSON final
+              break;
+            }
+          } else {
+            // Não está mais escapado, tentar parsear como JSON
+            break;
+          }
+        }
+        
+        // Parsear como JSON final
+        let finalAttributes: any;
+        if (typeof attrStr === 'string') {
+          finalAttributes = JSON.parse(attrStr);
+        } else {
+          finalAttributes = attrStr;
+        }
+        
+        return finalAttributes;
+      } catch (e) {
+        console.warn('Erro ao parsear atributos:', e, attributes);
+        return {};
+      }
+    }
+    
+    return {};
+  }
+
   openProductModal(product?: Product) {
     this.editingProduct = product || null;
     
     if (product) {
+      // Parsear atributos se vierem como string
+      const parsedAttributes = this.parseAttributes(product.attributes);
+      
       this.productFormData = {
         name: product.name,
         description: product.description || '',
@@ -223,11 +282,36 @@ export class ProductsComponent implements OnInit {
         stock: product.stock,
         category: product.category || '',
         collection: product.collection || '',
-        attributes: product.attributes || {},
+        attributes: parsedAttributes,
         images: this.normalizeImages(product.images),
         isActive: product.isActive ?? true,
         priority: product.priority || 1
       };
+      
+      // Converter atributos para JSON string para exibir no textarea (backup)
+      this.attributesJson = Object.keys(parsedAttributes).length > 0 
+        ? JSON.stringify(parsedAttributes, null, 2)
+        : '';
+      
+      // Extrair tamanho e cores dos atributos
+      this.productSize = '';
+      this.productColors = '';
+      
+      if (parsedAttributes.size) {
+        if (Array.isArray(parsedAttributes.size)) {
+          this.productSize = parsedAttributes.size.join(', ');
+        } else {
+          this.productSize = String(parsedAttributes.size);
+        }
+      }
+      
+      if (parsedAttributes.color) {
+        if (Array.isArray(parsedAttributes.color)) {
+          this.productColors = parsedAttributes.color.join(', ');
+        } else {
+          this.productColors = String(parsedAttributes.color);
+        }
+      }
     } else {
       this.productFormData = {
         name: '',
@@ -241,6 +325,9 @@ export class ProductsComponent implements OnInit {
         isActive: true,
         priority: 1
       };
+      this.attributesJson = '';
+      this.productSize = '';
+      this.productColors = '';
     }
 
     // Abrir modal (assumindo que você tem Bootstrap)
@@ -251,6 +338,57 @@ export class ProductsComponent implements OnInit {
   }
 
   saveProduct() {
+    // Construir objeto de atributos a partir dos campos tamanho e cor
+    const attributes: any = {};
+    
+    // Processar tamanhos
+    if (this.productSize && this.productSize.trim()) {
+      // Separar por vírgula, remover espaços e filtrar vazios
+      const sizes = this.productSize
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+      if (sizes.length > 0) {
+        attributes.size = sizes.length === 1 ? sizes[0] : sizes;
+      }
+    }
+    
+    // Processar cores
+    if (this.productColors && this.productColors.trim()) {
+      // Separar por vírgula, remover espaços e filtrar vazios
+      const colors = this.productColors
+        .split(',')
+        .map(c => c.trim())
+        .filter(c => c.length > 0);
+      if (colors.length > 0) {
+        // Sempre usar "color" - se for múltiplas cores, usar como string separada por vírgula
+        if (colors.length === 1) {
+          attributes.color = colors[0];
+        } else {
+          attributes.color = colors.join(', ');
+        }
+      }
+    }
+    
+    // Se houver atributos do JSON também (fallback), mesclar
+    if (this.attributesJson && this.attributesJson.trim()) {
+      try {
+        const parsed = JSON.parse(this.attributesJson.trim());
+        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+          // Mesclar com os atributos dos campos (campos têm prioridade)
+          this.productFormData.attributes = { ...parsed, ...attributes };
+        } else {
+          this.productFormData.attributes = attributes;
+        }
+      } catch (e) {
+        // Se JSON inválido, usar apenas os campos
+        this.productFormData.attributes = attributes;
+      }
+    } else {
+      // Usar apenas os atributos dos campos
+      this.productFormData.attributes = attributes;
+    }
+    
     if (this.editingProduct) {
       this.updateProduct();
     } else {
@@ -375,5 +513,4 @@ export class ProductsComponent implements OnInit {
     
     return [];
   }
-
 }

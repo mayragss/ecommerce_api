@@ -106,9 +106,30 @@ export class ApiService {
     formData.append('collection', product.collection || '');
     formData.append('priority', (product.priority || 1).toString());
     
-    // Adicionar atributos como JSON
+    // Adicionar atributos como JSON string
+    // Garantir que os atributos sejam sempre convertidos para JSON string
     if (product.attributes) {
-      formData.append('attributes', JSON.stringify(product.attributes));
+      let attributesJson: string;
+      if (typeof product.attributes === 'string') {
+        // Se já é string, verificar se é JSON válido e usar diretamente
+        try {
+          JSON.parse(product.attributes);
+          attributesJson = product.attributes;
+        } catch (e) {
+          // Se não for JSON válido, tentar stringify novamente
+          attributesJson = JSON.stringify(product.attributes);
+        }
+      } else if (typeof product.attributes === 'object') {
+        // Se é objeto, converter para JSON string
+        attributesJson = JSON.stringify(product.attributes);
+      } else {
+        // Caso contrário, converter para string
+        attributesJson = JSON.stringify(product.attributes);
+      }
+      formData.append('attributes', attributesJson);
+    } else {
+      // Se não houver atributos, enviar objeto vazio como JSON
+      formData.append('attributes', JSON.stringify({}));
     }
     
     // Separar imagens existentes (strings) das novas (Files)

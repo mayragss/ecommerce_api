@@ -4,12 +4,11 @@
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center">
         <h1 class="h3 mb-0 text-gray-800">
-          <i class="fas fa-shopping-bag me-2"></i>
           Gestão de Pedidos
         </h1>
         <div class="btn-group">
-          <button class="btn btn-outline-primary" (click)="refreshOrders()">
-            <i class="fas fa-sync-alt me-2"></i>
+          <button class="btn btn-outline-primary" style="color: #624725;" (click)="refreshOrders()">
+            <i style="color: #624725;" class="fas fa-sync-alt me-2"></i>
             Atualizar
           </button>
         </div>
@@ -142,7 +141,7 @@
               </td>
               <td>
                 <div class="btn-group" role="group">
-                  <button class="btn btn-sm" (click)="viewOrder(order)" style="border-color: #624725; color: #624725;" title="Ver detalhes">
+                  <button class="btn btn-sm" (click)="viewOrder(order)" style="color: #624725;" title="Ver detalhes">
                     <i class="fas fa-eye"></i>
                   </button>
                   <button class="btn btn-sm btn-outline-success" (click)="updateOrderStatus(order)" title="Editar status">
@@ -357,7 +356,7 @@
           </div>
         </div>
         
-        <div class="modal-footer">
+        <div class="modal-footer" style="color: #624725 !important;">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="min-width: 120px;">Cancelar</button>
           <button type="submit" class="btn" [disabled]="statusForm.invalid || saving" style="min-width: 120px; background-color: #624725; color: white; border-color: #624725;">
             <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
