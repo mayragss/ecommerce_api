@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { Order, Product, User, Coupon } = require("../models");
+const { Order, Product, User, Coupon, OrderItem } = require("../models");
+const orderController = require("../controllers/order.controller");
 
 // Estatísticas básicas
 router.get("/stats", async (req, res) => {
@@ -88,5 +89,30 @@ router.get("/dashboard", async (req, res) => {
     res.status(500).json({ error: 'Erro ao obter dados do dashboard' });
   }
 });
+
+/**
+ * @swagger
+ * /admin/orders/by-user/{userId}:
+ *   get:
+ *     summary: Get all orders for a specific user (admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: List of orders
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.get("/orders/by-user/:userId", orderController.getByUser);
 
 module.exports = router;

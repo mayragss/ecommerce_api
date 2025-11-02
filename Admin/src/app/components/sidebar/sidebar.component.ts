@@ -11,7 +11,6 @@ import { AuthService } from '../../services/auth.service';
     <div class="sidebar">
       <div class="p-3">
         <h5 class="text-white mb-4">
-          <i class="fas fa-tachometer-alt me-2"></i>
           Dashboard
         </h5>
         

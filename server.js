@@ -16,6 +16,7 @@ app.use(express.json());
 const allowedOrigins = [
   'http://localhost:4200',         // ambiente local
   'http://localhost:3000',         // API local
+  'http://localhost:62924',        // ambiente local adicional
   'https://gaithgio.com',          // produção
   'https://www.gaithgio.com',      // produção
   'https://admin.gaithgio.com',    // produção

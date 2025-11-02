@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Order } from '../../models/order.model';
+import { PaymentProofFormData } from '../../models/payment-proof.model';
 
 @Component({
   selector: 'app-orders',
@@ -26,6 +27,9 @@ export class OrdersComponent implements OnInit {
   
   selectedOrder: Order | null = null;
   newStatus = '';
+  paidAmount: number | null = null;
+  selectedFile: File | null = null;
+  observations: string = '';
   
   saving = false;
   loading = false;
@@ -40,7 +44,11 @@ export class OrdersComponent implements OnInit {
     this.loading = true;
     this.apiService.getOrders().subscribe({
       next: (orders) => {
-        this.orders = orders;
+        // Mapear User para user para manter compatibilidade
+        this.orders = orders.map(order => ({
+          ...order,
+          user: order.User || order.user
+        }));
         this.filterOrders();
         this.loading = false;
       },
@@ -149,8 +157,12 @@ export class OrdersComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
+    if (!status || status.trim() === '') {
+      return 'badge-pending';
+    }
     const statusClasses: { [key: string]: string } = {
       'pending': 'badge-pending',
+      'awaiting_treatment': 'badge-awaiting-treatment',
       'paid': 'badge-paid',
       'shipped': 'badge-shipped',
       'delivered': 'badge-delivered',
@@ -160,8 +172,12 @@ export class OrdersComponent implements OnInit {
   }
 
   getStatusText(status: string): string {
+    if (!status || status.trim() === '') {
+      return 'Pendente';
+    }
     const statusTexts: { [key: string]: string } = {
       'pending': 'Pendente',
+      'awaiting_treatment': 'Aguardando Tratamento',
       'paid': 'Pago',
       'shipped': 'Enviado',
       'delivered': 'Entregue',
@@ -183,7 +199,7 @@ export class OrdersComponent implements OnInit {
 
   getOrderItemsCount(order: Order): number {
     if (order.items && Array.isArray(order.items)) {
-      return order.items.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
+      return order.items.length;
     }
     return 0;
   }
@@ -212,6 +228,9 @@ export class OrdersComponent implements OnInit {
   updateOrderStatus(order: Order) {
     this.selectedOrder = order;
     this.newStatus = order.status;
+    this.paidAmount = null;
+    this.selectedFile = null;
+    this.observations = '';
     
     // Abrir modal de atualização de status
     const modal = document.getElementById('statusUpdateModal');
@@ -220,19 +239,53 @@ export class OrdersComponent implements OnInit {
     }
   }
 
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+    }
+  }
+
   saveStatusUpdate() {
     if (!this.selectedOrder) return;
     
     this.saving = true;
+    
+    // Primeiro atualizar o status do pedido
+    console.log('Atualizando status para:', this.newStatus);
     this.apiService.updateOrderStatus(this.selectedOrder.id, this.newStatus).subscribe({
       next: (order) => {
+        console.log('Pedido atualizado recebido:', order);
+        console.log('Status do pedido:', order.status);
         const index = this.orders.findIndex(o => o.id === order.id);
         if (index !== -1) {
           this.orders[index] = order;
           this.filterOrders();
         }
-        this.closeStatusModal();
-        this.saving = false;
+        
+        // Se houver valor pago ou comprovante, salvar o comprovativo
+        if (this.paidAmount || this.selectedFile || this.observations) {
+          const amount = this.paidAmount || order.total;
+          this.apiService.createPaymentProof({
+            orderId: order.id,
+            amount: amount,
+            document: this.selectedFile || undefined,
+            observations: this.observations || undefined
+          }).subscribe({
+            next: () => {
+              this.closeStatusModal();
+              this.saving = false;
+            },
+            error: (error) => {
+              console.error('Error creating payment proof:', error);
+              this.closeStatusModal();
+              this.saving = false;
+            }
+          });
+        } else {
+          this.closeStatusModal();
+          this.saving = false;
+        }
       },
       error: (error) => {
         console.error('Error updating order status:', error);
@@ -275,9 +328,48 @@ export class OrdersComponent implements OnInit {
     if (modal) {
       (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
     }
+    // Limpar campos ao fechar
+    this.paidAmount = null;
+    this.selectedFile = null;
+    this.observations = '';
   }
 
   getUserPhone(user: Order['user'] | null | undefined): string {
     return (user as any)?.phone || 'N/A';
+  }
+
+  orderToDelete: Order | null = null;
+
+  deleteOrder(order: Order) {
+    this.orderToDelete = order;
+    const modal = document.getElementById('deleteOrderModal');
+    if (modal) {
+      (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
+    }
+  }
+
+  confirmDeleteOrder() {
+    if (!this.orderToDelete) return;
+
+    this.apiService.deleteOrder(this.orderToDelete.id).subscribe({
+      next: () => {
+        this.orders = this.orders.filter(o => o.id !== this.orderToDelete!.id);
+        this.filterOrders();
+        this.closeDeleteOrderModal();
+      },
+      error: (error) => {
+        console.error('Error deleting order:', error);
+        alert('Erro ao excluir pedido. Tente novamente.');
+        this.closeDeleteOrderModal();
+      }
+    });
+  }
+
+  closeDeleteOrderModal() {
+    const modal = document.getElementById('deleteOrderModal');
+    if (modal) {
+      (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
+    }
+    this.orderToDelete = null;
   }
 }

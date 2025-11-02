@@ -1,12 +1,17 @@
 export interface Order {
   id: number;
   userId: number;
-  status: 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'awaiting_treatment' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'failed';
   total: number;
   createdAt: string;
   updatedAt: string;
   user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  User?: {
     id: number;
     name: string;
     email: string;

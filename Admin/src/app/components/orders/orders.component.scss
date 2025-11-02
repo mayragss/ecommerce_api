@@ -14,8 +14,9 @@
   margin-bottom: 2px;
 }
 
-.order-items {
-  text-align: center;
+.order-items-text {
+  font-weight: 600;
+  color: #495057;
 }
 
 .order-total {
@@ -50,8 +51,13 @@
   color: white;
 }
 
+.badge-awaiting-treatment {
+  background-color: #ff9800;
+  color: white;
+}
+
 .badge-shipped {
-  background-color: #6f42c1;
+  background-color: #624725;
   color: white;
 }
 
@@ -100,6 +106,15 @@
 
 .modal-xl {
   max-width: 1200px;
+}
+
+#statusUpdateModal,
+#statusUpdateModal * {
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+#statusUpdateModal .modal-footer .btn {
+  min-width: 120px;
 }
 
 .form-label {

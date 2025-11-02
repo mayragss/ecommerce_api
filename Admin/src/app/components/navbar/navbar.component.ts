@@ -9,9 +9,8 @@ import { Router } from '@angular/router';
   template: `
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
       <div class="container-fluid">
-        <a class="navbar-brand fw-bold text-primary" href="#">
-          <i class="fas fa-shopping-cart me-2"></i>
-          Admin Panel
+        <a class="navbar-brand fw-bold" href="#" style="color: #624725;">
+          GAITHGIO
         </a>
         
         <div class="navbar-nav ms-auto">

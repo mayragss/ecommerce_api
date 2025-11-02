@@ -117,3 +117,6 @@ SELECT 'Favoritos', COUNT(*) FROM Favorites;
 
 
 
+
+
+

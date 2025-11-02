@@ -4,10 +4,13 @@
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center">
         <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+      
+      <!--
         <div class="text-muted">
           <i class="fas fa-calendar-alt me-2"></i>
           {{ currentDate | date:'dd/MM/yyyy' }}
         </div>
+        -->
       </div>
     </div>
   </div>
@@ -131,8 +134,8 @@
                   </td>
                   <td>{{ order.createdAt | date:'dd/MM/yyyy' }}</td>
                   <td>
-                    <button class="btn btn-sm btn-outline-primary" (click)="viewOrder(order)">
-                      <i class="fas fa-eye"></i>
+                    <button class="btn btn-sm d-flex align-items-center justify-content-center" (click)="viewOrder(order)" style="border-color: #624725; color: #624725;">
+                      <i class="fas fa-eye" style="color: #624725;"></i>
                     </button>
                   </td>
                 </tr>
@@ -153,7 +156,7 @@
     <div class="col-xl-4 col-lg-5">
       <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold text-primary">Produtos Mais Vendidos</h6>
+          <h6 class="m-0 font-weight-bold" style="font-size: 0.875rem; color: #624725;">PRODUTOS MAIS VENDIDOS</h6>
           <button class="btn btn-sm btn-primary" (click)="loadTopProducts()">
             <i class="fas fa-sync-alt"></i>
           </button>
@@ -162,13 +165,13 @@
           <div *ngIf="topProducts.length > 0; else noProducts">
             <div class="d-flex align-items-center mb-3" *ngFor="let product of topProducts; let i = index">
               <div class="me-3">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                     style="width: 40px; height: 40px;">
+                <div class="text-white rounded-circle d-flex align-items-center justify-content-center" 
+                     style="width: 40px; height: 40px; background-color: #624725;">
                   {{ i + 1 }}
                 </div>
               </div>
               <div class="flex-grow-1">
-                <div class="text-xs font-weight-bold text-primary text-uppercase">
+                <div class="text-xs font-weight-bold text-uppercase" style="color: #624725;">
                   {{ product.name }}
                 </div>
                 <div class="text-xs text-muted">
@@ -195,6 +198,98 @@
   <div class="text-center" *ngIf="loading">
     <div class="spinner-border text-primary" role="status">
       <span class="sr-only">Carregando...</span>
+    </div>
+  </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="orderDetailsModalLabel">
+          Detalhes do Pedido #{{ selectedOrder?.id }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedOrder">
+        <div class="row">
+          <!-- Order Info -->
+          <div class="col-md-6">
+            <h6>Informações do Pedido</h6>
+            <table class="table table-sm">
+              <tr>
+                <td><strong>ID:</strong></td>
+                <td>#{{ selectedOrder.id }}</td>
+              </tr>
+              <tr>
+                <td><strong>Status:</strong></td>
+                <td>
+                  <span class="badge" [ngClass]="getStatusClass(selectedOrder.status)">
+                    {{ getStatusText(selectedOrder.status) }}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Total:</strong></td>
+                <td>{{ selectedOrder.total | currency:'BRL' }}</td>
+              </tr>
+              <tr>
+                <td><strong>Data:</strong></td>
+                <td>{{ formatDate(selectedOrder.createdAt) }}</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Customer Info -->
+          <div class="col-md-6">
+            <h6>Informações do Cliente</h6>
+            <table class="table table-sm">
+              <tr>
+                <td><strong>Nome:</strong></td>
+                <td>{{ selectedOrder.user?.name || 'N/A' }}</td>
+              </tr>
+              <tr>
+                <td><strong>Email:</strong></td>
+                <td>{{ selectedOrder.user?.email || 'N/A' }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <h6>Itens do Pedido</h6>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th style="color: white !important; background-color: #624725 !important;">Produto</th>
+                    <th style="color: white !important; background-color: #624725 !important;">Quantidade</th>
+                    <th style="color: white !important; background-color: #624725 !important;">Preço Unit.</th>
+                    <th style="color: white !important; background-color: #624725 !important;">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of getOrderItems(selectedOrder)">
+                    <td>{{ item.product?.name || 'Produto removido' }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.price | currency:'BRL' }}</td>
+                    <td>{{ (item.quantity * item.price) | currency:'BRL' }}</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3"><strong>Total:</strong></td>
+                    <td><strong>{{ selectedOrder.total | currency:'BRL' }}</strong></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

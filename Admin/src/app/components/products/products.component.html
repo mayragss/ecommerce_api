@@ -110,10 +110,10 @@
               </td>
               <td>
                 <div class="btn-group" role="group">
-                  <button class="btn btn-sm btn-outline-primary" (click)="editProduct(product)">
+                  <button class="btn btn-sm" (click)="editProduct(product)" style="border-color: #624725; color: #624725;" title="Editar produto">
                     <i class="fas fa-edit"></i>
                   </button>
-                  <button class="btn btn-sm btn-outline-danger" (click)="deleteProduct(product)">
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteProduct(product)" title="Excluir produto">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
@@ -277,12 +277,48 @@
         
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button 
+            type="button" 
+            class="btn btn-danger" 
+            *ngIf="editingProduct" 
+            (click)="deleteProductFromModal()"
+            [disabled]="saving"
+          >
+            <i class="fas fa-trash me-2"></i>
+            Apagar
+          </button>
           <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid || saving">
             <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
             {{ saving ? 'Salvando...' : 'Salvar' }}
           </button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteProductModalLabel">
+          <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+          Confirmar Exclusão
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza que deseja excluir o produto <strong>"{{ productToDelete?.name }}"</strong>?</p>
+        <p class="text-danger"><small>Esta ação não pode ser desfeita.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+          <i class="fas fa-trash me-2"></i>
+          Excluir
+        </button>
+      </div>
     </div>
   </div>
 </div>

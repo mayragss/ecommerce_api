@@ -54,6 +54,22 @@ router.post("/", authenticate, controller.create);
 
 /**
  * @swagger
+ * /orders/my-orders:
+ *   get:
+ *     summary: Get all orders for authenticated user
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of orders
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/my-orders", authenticate, controller.getMyOrders);
+
+/**
+ * @swagger
  * /orders/{id}:
  *   get:
  *     summary: Get order by ID (admin only)
@@ -80,27 +96,6 @@ router.post("/", authenticate, controller.create);
  *         description: Unauthorized
  */
 router.get("/:id", authenticate, authorizeAdmin, controller.getById);
-
-/**
- * @swagger
- * /orders/by-user/{userId}:
- *   get:
- *     summary: Get all orders for a user
- *     tags: [Orders]
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: integer
- *         description: User ID
- *     responses:
- *       200:
- *         description: List of orders
- *       404:
- *         description: Orders not found
- */
-router.get("/by-user/:userId", controller.getByUser);
 
 /**
  * @swagger
@@ -137,5 +132,62 @@ router.get("/by-user/:userId", controller.getByUser);
  *         description: Unauthorized
  */
 router.put("/:id/status", authenticate, authorizeAdmin, controller.UpdateStatus);
+
+/**
+ * @swagger
+ * /orders/awaiting-treatment:
+ *   post:
+ *     summary: Set order to awaiting treatment (client action via WhatsApp)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       description: Order ID
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               orderId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Order status updated
+ *       400:
+ *         description: Invalid request
+ *       403:
+ *         description: Forbidden
+ *       401:
+ *         description: Unauthorized
+ */
+router.post("/awaiting-treatment", authenticate, controller.setAwaitingTreatment);
+
+/**
+ * @swagger
+ * /orders/{id}:
+ *   delete:
+ *     summary: Delete an order by ID (admin only)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Order ID
+ *     responses:
+ *       200:
+ *         description: Order deleted successfully
+ *       404:
+ *         description: Order not found
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (admin only)
+ */
+router.delete("/:id", authenticate, authorizeAdmin, controller.delete);
 
 module.exports = router;

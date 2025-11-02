@@ -303,20 +303,50 @@ export class ProductsComponent implements OnInit {
     this.openProductModal(product);
   }
 
+  productToDelete: Product | null = null;
+
   deleteProduct(product: Product) {
-    if (confirm(`Tem certeza que deseja excluir o produto "${product.name}"?`)) {
-      this.apiService.deleteProduct(product.id).subscribe({
-        next: () => {
-          this.products = this.products.filter(p => p.id !== product.id);
-          this.filterProducts();
-          this.cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('Error deleting product:', error);
-          this.cdr.markForCheck();
-        }
-      });
+    this.productToDelete = product;
+    const modal = document.getElementById('deleteProductModal');
+    if (modal) {
+      (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
     }
+  }
+
+  deleteProductFromModal() {
+    if (this.editingProduct) {
+      // Fechar o modal de edição primeiro
+      this.closeModal();
+      // Depois abrir o modal de confirmação de exclusão
+      this.deleteProduct(this.editingProduct);
+    }
+  }
+
+  confirmDelete() {
+    if (!this.productToDelete) return;
+
+    this.apiService.deleteProduct(this.productToDelete.id).subscribe({
+      next: () => {
+        this.products = this.products.filter(p => p.id !== this.productToDelete!.id);
+        this.filterProducts();
+        this.closeDeleteModal();
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error deleting product:', error);
+        alert('Erro ao excluir produto. Tente novamente.');
+        this.closeDeleteModal();
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  closeDeleteModal() {
+    const modal = document.getElementById('deleteProductModal');
+    if (modal) {
+      (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
+    }
+    this.productToDelete = null;
   }
 
   closeModal() {

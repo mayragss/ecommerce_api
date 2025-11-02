@@ -23,6 +23,7 @@ export class DashboardComponent implements OnInit {
   topProducts: Product[] = [];
   loading = false;
   currentDate = new Date();
+  selectedOrder: Order | null = null;
 
   constructor(private apiService: ApiService) {}
 
@@ -80,8 +81,12 @@ export class DashboardComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
+    if (!status || status.trim() === '') {
+      return 'badge-pending';
+    }
     const statusClasses: { [key: string]: string } = {
       'pending': 'badge-pending',
+      'awaiting_treatment': 'badge-awaiting-treatment',
       'paid': 'badge-paid',
       'shipped': 'badge-shipped',
       'delivered': 'badge-delivered',
@@ -91,8 +96,12 @@ export class DashboardComponent implements OnInit {
   }
 
   getStatusText(status: string): string {
+    if (!status || status.trim() === '') {
+      return 'Pendente';
+    }
     const statusTexts: { [key: string]: string } = {
       'pending': 'Pendente',
+      'awaiting_treatment': 'Aguardando Tratamento',
       'paid': 'Pago',
       'shipped': 'Enviado',
       'delivered': 'Entregue',
@@ -101,8 +110,24 @@ export class DashboardComponent implements OnInit {
     return statusTexts[status] || status;
   }
 
+  getOrderItems(order: Order): any[] {
+    if (order.items && Array.isArray(order.items)) {
+      return order.items;
+    }
+    return [];
+  }
+
+  formatDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  }
+
   viewOrder(order: Order) {
-    // Implementar visualização do pedido
-    console.log('View order:', order);
+    this.selectedOrder = order;
+    
+    // Abrir modal de detalhes
+    const modal = document.getElementById('orderDetailsModal');
+    if (modal) {
+      (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
+    }
   }
 }

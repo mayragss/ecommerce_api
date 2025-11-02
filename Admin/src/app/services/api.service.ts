@@ -6,6 +6,7 @@ import { User } from '../models/user.model';
 import { Product, ProductFormData } from '../models/product.model';
 import { Order } from '../models/order.model';
 import { Coupon, CouponFormData } from '../models/coupon.model';
+import { PaymentProof, PaymentProofFormData } from '../models/payment-proof.model';
 
 @Injectable({
   providedIn: 'root'
@@ -174,6 +175,49 @@ export class ApiService {
 
   updateOrderStatus(id: number, status: string): Observable<Order> {
     return this.http.put<Order>(`${this.baseUrl}/orders/${id}/status`, { status }, {
+      headers: this.getHeaders()
+    });
+  }
+
+  deleteOrder(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/orders/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  // Payment Proof endpoints
+  createPaymentProof(paymentProof: PaymentProofFormData): Observable<PaymentProof> {
+    const formData = new FormData();
+    formData.append('orderId', paymentProof.orderId.toString());
+    formData.append('amount', paymentProof.amount.toString());
+    
+    if (paymentProof.document) {
+      formData.append('document', paymentProof.document);
+    }
+    
+    if (paymentProof.observations) {
+      formData.append('observations', paymentProof.observations);
+    }
+    
+    return this.http.post<PaymentProof>(`${this.baseUrl}/payment-proofs`, formData, {
+      headers: this.getHeadersForFormData()
+    });
+  }
+
+  getPaymentProofsByOrder(orderId: number): Observable<PaymentProof[]> {
+    return this.http.get<PaymentProof[]>(`${this.baseUrl}/payment-proofs/order/${orderId}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getPaymentProof(id: number): Observable<PaymentProof> {
+    return this.http.get<PaymentProof>(`${this.baseUrl}/payment-proofs/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  deletePaymentProof(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/payment-proofs/${id}`, {
       headers: this.getHeaders()
     });
   }
