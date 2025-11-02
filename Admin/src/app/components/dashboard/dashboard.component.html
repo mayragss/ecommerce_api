@@ -101,12 +101,12 @@
   <!-- Charts Row -->
   <div class="row">
     <!-- Recent Orders -->
-    <div class="col-xl-8 col-lg-7">
+    <div class="col-xl-7 col-lg-6">
       <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
           <h6 class="m-0 font-weight-bold" style="color: #624725;">Pedidos Recentes</h6>
-          <button class="btn btn-sm btn-primary" (click)="loadOrders()">
-            <i class="fas fa-sync-alt"></i>
+          <button class="btn btn-sm btn-primary" (click)="loadOrders()" style="background: none;">
+            <i class="fas fa-sync-alt" style="color: #624725;"></i>
           </button>
         </div>
         <div class="card-body">
@@ -134,7 +134,7 @@
                   </td>
                   <td>{{ order.createdAt | date:'dd/MM/yyyy' }}</td>
                   <td>
-                    <button class="btn btn-sm d-flex align-items-center justify-content-center" (click)="viewOrder(order)" style="border-color: #624725; color: #624725;">
+                    <button class="btn btn-sm d-flex align-items-center justify-content-center" (click)="viewOrder(order)" style="color: #624725;">
                       <i class="fas fa-eye" style="color: #624725;"></i>
                     </button>
                   </td>
@@ -153,12 +153,12 @@
     </div>
 
     <!-- Top Products -->
-    <div class="col-xl-4 col-lg-5">
+    <div class="col-xl-5 col-lg-6">
       <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
           <h6 class="m-0 font-weight-bold" style="font-size: 0.875rem; color: #624725;">PRODUTOS MAIS VENDIDOS</h6>
-          <button class="btn btn-sm btn-primary" (click)="loadTopProducts()">
-            <i class="fas fa-sync-alt"></i>
+          <button class="btn btn-sm btn-primary" (click)="loadTopProducts()" style="background: none;">
+            <i class="fas fa-sync-alt" style="color: #624725;"></i>
           </button>
         </div>
         <div class="card-body">
@@ -174,17 +174,8 @@
               </thead>
               <tbody>
                 <tr *ngFor="let product of topProducts; let i = index">
-                  <td>
-                    <div class="text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" 
-                         style="width: 30px; height: 30px; background-color: #624725;">
-                      {{ i + 1 }}
-                    </div>
-                  </td>
-                  <td>
-                    <div class="text-xs font-weight-bold" style="color: #624725;">
-                      {{ product.name }}
-                    </div>
-                  </td>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ product.name }}</td>
                   <td>{{ product.price | currency:'BRL' }}</td>
                   <td>{{ product.sold || 0 }}</td>
                 </tr>

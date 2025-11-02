@@ -84,10 +84,13 @@
   font-weight: 600;
   color: white;
   background-color: #624725;
+  text-align: center;
 }
 
 .table td {
   vertical-align: middle;
+  text-align: center;
+  color: #000;
 }
 
 .pagination {
@@ -153,32 +156,42 @@
 
 .btn-outline-primary {
   color: #007bff;
-  border-color: #007bff;
+  border: none;
 }
 
 .btn-outline-primary:hover {
-  background-color: #007bff;
-  border-color: #007bff;
+  background-color: transparent;
+  border: none;
 }
 
 .btn-outline-success {
   color: #28a745;
-  border-color: #28a745;
+  border: none;
 }
 
 .btn-outline-success:hover {
-  background-color: #28a745;
-  border-color: #28a745;
+  background-color: transparent;
+  border: none;
 }
 
 .btn-outline-secondary {
   color: #6c757d;
-  border-color: #6c757d;
+  border: none;
 }
 
 .btn-outline-secondary:hover {
-  background-color: #6c757d;
-  border-color: #6c757d;
+  background-color: transparent;
+  border: none;
+}
+
+.btn-outline-danger {
+  color: #dc3545;
+  border: none;
+}
+
+.btn-outline-danger:hover {
+  background-color: transparent;
+  border: none;
 }
 
 .spinner-border-sm {

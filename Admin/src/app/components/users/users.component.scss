@@ -25,12 +25,12 @@
 
 .user-name {
   font-weight: 600;
-  color: white;
+  color: #000;
   margin-bottom: 2px;
 }
 
 .user-email {
-  color: #6c757d;
+  color: #000;
   font-size: 0.9rem;
 }
 
@@ -73,10 +73,13 @@
   font-weight: 600;
   color: white;
   background-color: #624725;
+  text-align: center;
 }
 
 .table td {
   vertical-align: middle;
+  color: #000;
+  text-align: center;
 }
 
 .pagination {
@@ -133,32 +136,32 @@
 
 .btn-outline-primary {
   color: #007bff;
-  border-color: #007bff;
+  border: none;
 }
 
 .btn-outline-primary:hover {
-  background-color: #007bff;
-  border-color: #007bff;
+  background-color: transparent;
+  border: none;
 }
 
 .btn-outline-info {
   color: #17a2b8;
-  border-color: #17a2b8;
+  border: none;
 }
 
 .btn-outline-info:hover {
-  background-color: #17a2b8;
-  border-color: #17a2b8;
+  background-color: transparent;
+  border: none;
 }
 
 .btn-outline-danger {
   color: #dc3545;
-  border-color: #dc3545;
+  border: none;
 }
 
 .btn-outline-danger:hover {
-  background-color: #dc3545;
-  border-color: #dc3545;
+  background-color: transparent;
+  border: none;
 }
 
 .spinner-border-sm {
