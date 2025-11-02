@@ -104,7 +104,7 @@
     <div class="col-xl-8 col-lg-7">
       <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold text-primary">Pedidos Recentes</h6>
+          <h6 class="m-0 font-weight-bold" style="color: #624725;">Pedidos Recentes</h6>
           <button class="btn btn-sm btn-primary" (click)="loadOrders()">
             <i class="fas fa-sync-alt"></i>
           </button>
@@ -162,26 +162,34 @@
           </button>
         </div>
         <div class="card-body">
-          <div *ngIf="topProducts.length > 0; else noProducts">
-            <div class="d-flex align-items-center mb-3" *ngFor="let product of topProducts; let i = index">
-              <div class="me-3">
-                <div class="text-white rounded-circle d-flex align-items-center justify-content-center" 
-                     style="width: 40px; height: 40px; background-color: #624725;">
-                  {{ i + 1 }}
-                </div>
-              </div>
-              <div class="flex-grow-1">
-                <div class="text-xs font-weight-bold text-uppercase" style="color: #624725;">
-                  {{ product.name }}
-                </div>
-                <div class="text-xs text-muted">
-                  {{ product.sold }} vendas
-                </div>
-              </div>
-              <div class="text-xs font-weight-bold text-gray-800">
-                {{ product.price | currency:'BRL' }}
-              </div>
-            </div>
+          <div class="table-responsive" *ngIf="topProducts.length > 0; else noProducts">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Nome</th>
+                  <th>Preço</th>
+                  <th>Vendidos</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let product of topProducts; let i = index">
+                  <td>
+                    <div class="text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                         style="width: 30px; height: 30px; background-color: #624725;">
+                      {{ i + 1 }}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="text-xs font-weight-bold" style="color: #624725;">
+                      {{ product.name }}
+                    </div>
+                  </td>
+                  <td>{{ product.price | currency:'BRL' }}</td>
+                  <td>{{ product.sold || 0 }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
           <ng-template #noProducts>
             <div class="text-center py-4">

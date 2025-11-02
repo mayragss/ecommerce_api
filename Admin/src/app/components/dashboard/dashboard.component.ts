@@ -56,7 +56,20 @@ export class DashboardComponent implements OnInit {
   loadOrders() {
     this.apiService.getOrders().subscribe({
       next: (orders) => {
-        this.recentOrders = orders.slice(0, 5); // Últimos 5 pedidos
+        // Mapear User para user para manter compatibilidade
+        const ordersWithUser = orders.map(order => ({
+          ...order,
+          user: order.User || order.user
+        }));
+        
+        // Ordenar por data de criação (mais recente primeiro) e pegar os 5 primeiros
+        this.recentOrders = ordersWithUser
+          .sort((a, b) => {
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            return dateB - dateA; // Ordem decrescente (mais recente primeiro)
+          })
+          .slice(0, 5); // Últimos 5 pedidos
       },
       error: (error) => {
         console.error('Error loading recent orders:', error);

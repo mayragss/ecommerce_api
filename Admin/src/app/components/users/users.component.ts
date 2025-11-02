@@ -132,6 +132,23 @@ export class UsersComponent implements OnInit {
       .slice(0, 2);
   }
 
+  getAvatarColor(user: User): string {
+    // Gerar cor baseada no nome do usuário para consistência
+    const colors = [
+      '#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8',
+      '#6f42c1', '#e83e8c', '#fd7e14', '#20c997', '#6610f2',
+      '#d63384', '#0dcaf0', '#198754', '#ffc107', '#0d6efd'
+    ];
+    
+    // Gerar índice baseado no nome do usuário (sempre o mesmo para o mesmo nome)
+    let hash = 0;
+    for (let i = 0; i < user.name.length; i++) {
+      hash = user.name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  }
+
   getRoleClass(role: string): string {
     return role === 'admin' ? 'badge-admin' : 'badge-user';
   }

@@ -81,7 +81,7 @@
           <tbody>
             <tr *ngFor="let user of filteredUsers">
               <td>
-                <div class="avatar-circle">
+                <div class="avatar-circle" [ngStyle]="{'background-color': getAvatarColor(user)}">
                   {{ getUserInitials(user) }}
                 </div>
               </td>
@@ -253,7 +253,7 @@
       <div class="modal-body" *ngIf="selectedUser">
         <div class="row">
           <div class="col-md-4 text-center">
-            <div class="avatar-circle-large mb-3">
+            <div class="avatar-circle-large mb-3" [ngStyle]="{'background-color': getAvatarColor(selectedUser)}">
               {{ getUserInitials(selectedUser) }}
             </div>
             <h5>{{ selectedUser.name }}</h5>
