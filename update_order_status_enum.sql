@@ -8,3 +8,4 @@ UPDATE orders SET status = 'pending' WHERE status = '' OR status IS NULL;
 ALTER TABLE orders 
 MODIFY COLUMN status ENUM('pending', 'awaiting_treatment', 'paid', 'shipped', 'delivered', 'cancelled') NOT NULL DEFAULT 'pending';
 
+

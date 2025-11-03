@@ -41,6 +41,11 @@ i[class^="fa"],
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }
 
+/* Hide mobile close button by default (desktop/tablet) */
+.sidebar .close-btn {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -78,6 +83,70 @@ i[class^="fa"],
   
   .card {
     margin-bottom: 1rem;
+  }
+}
+
+// Fullscreen menu until 700px: only shows on toggle, occupies entire screen, centered
+@media (max-width: 700px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none; /* hidden by default */
+    z-index: 1000;
+    overflow-y: auto;
+    /* keep existing background color #624725 */
+  }
+
+  .sidebar.show {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  /* Hide sidebar header "Dashboard" on small screens */
+  .sidebar h5 {
+    display: none;
+  }
+
+  .sidebar .nav {
+    width: 100%;
+    max-width: 320px;
+    align-items: center;
+  }
+
+  .sidebar .nav-link {
+    width: 100%;
+    text-align: center;
+    font-size: 1.125rem; /* 18px */
+    padding: 14px 20px;
+    margin: 6px 0;
+  }
+
+  .sidebar .logout-btn {
+    max-width: 320px;
+  }
+
+  /* Close (X) button */
+  .sidebar .close-btn {
+    display: inline-flex;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: 0;
+    color: #fff;
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 8px;
+  }
+  .sidebar .close-btn:focus {
+    outline: none;
+    box-shadow: none;
   }
 }
 

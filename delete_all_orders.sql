@@ -15,3 +15,4 @@ DELETE FROM orders;
 -- ALTER TABLE order_items AUTO_INCREMENT = 1;
 -- ALTER TABLE payment_proofs AUTO_INCREMENT = 1;
 
+

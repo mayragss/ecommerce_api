@@ -9,28 +9,32 @@ import { AuthService } from '../../services/auth.service';
   imports: [CommonModule, RouterModule],
   template: `
     <div class="sidebar">
+      <!-- Close button for mobile -->
+      <button class="close-btn" type="button" aria-label="Fechar menu" (click)="close()">
+        <i class="fas fa-times"></i>
+      </button>
       <div class="p-3">
         <h5 class="text-white mb-4">
           Dashboard
         </h5>
         
         <nav class="nav flex-column">
-          <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+          <a class="nav-link" routerLink="/dashboard" routerLinkActive="active" (click)="close()">
             <i class="fas fa-chart-pie me-2"></i>
             Visão Geral
           </a>
           
-          <a class="nav-link" routerLink="/users" routerLinkActive="active">
+          <a class="nav-link" routerLink="/users" routerLinkActive="active" (click)="close()">
             <i class="fas fa-users me-2"></i>
             Usuários
           </a>
           
-          <a class="nav-link" routerLink="/products" routerLinkActive="active">
+          <a class="nav-link" routerLink="/products" routerLinkActive="active" (click)="close()">
             <i class="fas fa-box me-2"></i>
             Produtos
           </a>
           
-          <a class="nav-link" routerLink="/orders" routerLinkActive="active">
+          <a class="nav-link" routerLink="/orders" routerLinkActive="active" (click)="close()">
             <i class="fas fa-shopping-bag me-2"></i>
             Pedidos
           </a>
@@ -64,6 +68,15 @@ export class SidebarComponent {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  close(): void {
+    const sidebars = document.querySelectorAll('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    sidebars.forEach((el) => el.classList.remove('show'));
+    if (overlay) {
+      overlay.classList.remove('show');
+    }
   }
 }
 
