@@ -11,7 +11,9 @@ const path = require("path")
 const mysql = require("mysql2/promise"); 
 
 const app = express();
-app.use(express.json());
+// Aumentar limite de tamanho do body para permitir uploads grandes
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 const allowedOrigins = [
   'http://localhost:4200',         // ambiente local

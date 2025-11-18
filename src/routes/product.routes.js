@@ -126,7 +126,7 @@ router.get("/:id", controller.getById);
 router.post("/", authenticate, authorizeAdmin, upload.array("images", 5), (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ error: 'Arquivo muito grande. Máximo 5MB por arquivo.' });
+      return res.status(400).json({ error: 'Arquivo muito grande. Máximo 100MB por arquivo.' });
     }
     if (err.code === 'LIMIT_FILE_COUNT') {
       return res.status(400).json({ error: 'Muitos arquivos. Máximo 5 imagens.' });
@@ -171,7 +171,7 @@ router.post("/", authenticate, authorizeAdmin, upload.array("images", 5), (err, 
 router.put("/:id", authenticate, authorizeAdmin, upload.array("images", 5), (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ error: 'Arquivo muito grande. Máximo 5MB por arquivo.' });
+      return res.status(400).json({ error: 'Arquivo muito grande. Máximo 100MB por arquivo.' });
     }
     if (err.code === 'LIMIT_FILE_COUNT') {
       return res.status(400).json({ error: 'Muitos arquivos. Máximo 5 imagens.' });
