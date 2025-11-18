@@ -121,7 +121,7 @@
               </td>
               <td>
                 <div class="order-total">
-                  <strong>{{ order.total | currency:'BRL' }}</strong>
+                  <strong>{{ order.total | currency:'EUR' }}</strong>
                 </div>
               </td>
               <td>
@@ -215,7 +215,7 @@
               </tr>
               <tr>
                 <td><strong>Total:</strong></td>
-                <td>{{ selectedOrder.total | currency:'BRL' }}</td>
+                <td>{{ selectedOrder.total | currency:'EUR' }}</td>
               </tr>
               <tr>
                 <td><strong>Pagamento:</strong></td>
@@ -266,14 +266,14 @@
                   <tr *ngFor="let item of getOrderItems(selectedOrder)">
                     <td>{{ item.product?.name || 'Produto removido' }}</td>
                     <td>{{ item.quantity }}</td>
-                    <td>{{ item.price | currency:'BRL' }}</td>
-                    <td>{{ (item.quantity * item.price) | currency:'BRL' }}</td>
+                    <td>{{ item.price | currency:'EUR' }}</td>
+                    <td>{{ (item.quantity * item.price) | currency:'EUR' }}</td>
                   </tr>
                 </tbody>
                 <tfoot>
                   <tr>
                     <td colspan="3"><strong>Total:</strong></td>
-                    <td><strong>{{ selectedOrder.total | currency:'BRL' }}</strong></td>
+                    <td><strong>{{ selectedOrder.total | currency:'EUR' }}</strong></td>
                   </tr>
                 </tfoot>
               </table>
